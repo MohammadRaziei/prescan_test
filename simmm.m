@@ -1,0 +1,10 @@
+hws = get_param(bdroot, 'modelworkspace');
+hws.DataSource = 'MAT-File';
+hws.FileName = 'params';
+hws.assignin('pitch', -10);
+hws.assignin('roll', 30);
+hws.assignin('yaw', -2);
+hws.assignin('speed', 30);
+hws.saveToSource;
+hws.assignin('roll', 35);
+hws.reload;
