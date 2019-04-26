@@ -8,4 +8,5 @@ set_param('Experiment_3_cs','SimulationCommand','continue')
 set_param('Experiment_3_cs','SimulationCommand','stop')
 set_param('Experiment_3_cs','SimulationCommand','start')
 
+set_param('Experiment_3_cs','FastRestart','on')
 
