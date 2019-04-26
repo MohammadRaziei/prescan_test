@@ -39,8 +39,42 @@ def sim_status():
     eng.get_param(bdroot,'SimulationStatus',nargout=0)
     #The software returns 'stopped', 'initializing', 'running', 'paused', 'compiled', 'updating', 'terminating', or 'external' (used with the Simulink Coder™ product).
 
-
-
+def python_terminal():
+    __terminal_states__ = ['quit','start','stop','restart','pause','resume','update']
+    while True:
+        __terminal_state__ = input('>> ').casefold()
+        if not(__terminal_state__ in __terminal_states__):
+            print('{} is not suported command, try again')
+            continue
+        try:
+            if __terminal_state__ == 'quit':
+                print('Terminal quit successfully')
+                break
+            if __terminal_state__ == 'start':
+                print('Simulation started')
+                sim_start()
+            if __terminal_state__ == 'stop':
+                print('Simulation restarted')
+                sim_stop()
+            if __terminal_state__ == 'restart':
+                print('Simulation started')
+                sim_restart()
+            if __terminal_state__ == 'pause':
+                print('Simulation started')
+                sim_pause()
+            if __terminal_state__ == 'resume':
+                print('Simulation started')
+                sim_continue()
+            if __terminal_state__ == 'update':
+                print('Simulation started')
+                sim_update()
+                
+        except:
+            print('An error occurred')
+            continue
+        
+        
+        
 #import matlab.engine
 #future = matlab.engine.connect_matlab(background=True)
 #eng = future.result()
@@ -57,15 +91,19 @@ try:
         
 #    print( eng.get_param(gcs +'/InitialVelocity','Value') )
 #    update_speed(5)
-    eng.workspace['speed'] = eng.double(8)
+#    eng.workspace['speed'] = eng.double(8)
 #    eng.set_param(gcs +'/'+ 'InitialVelocity','Value','speed')
 #    eng.sim_speed(nargout=0)
-    eng.set_param('Experiment_3_cs/Audi_A8_Sedan_1/InitialVelocity','Value','speed',nargout=0)
+#    eng.set_param('Experiment_3_cs/Audi_A8_Sedan_1/InitialVelocity','Value','speed',nargout=0)
+    prescan_terminal()
 
-    print('Next')
+    print('The End')
 except:
     eng.quit()
     
+#sim_start();
+#time.sleep(5)
+#sim_stop();
 eng.quit()
 # -*- coding: utf-8 -*-
 
