@@ -1,15 +1,18 @@
 #import _thread as thread
 import threading
-import time
+import time,re
 
 ExperimentName = "Experiment_3_cs"
 bdroot = "Experiment_3_cs"
 gcs = 'Experiment_3_cs/Audi_A8_Sedan_1'
 def update_function(matlab_block,var):
-    global ExperimentName,gcs
     def __temp__(var_from_py):
-        eng.workspace[var] = float(var_from_py)
-     #   eng.set_param(eng.gcs() +'/'+ matlab_block,'Value',var)
+        global ExperimentName,gcs
+        if type(var_from_py) is type([]):
+            var_from_py = var_from_py[0]
+#        print([matlab_block,var,var_from_py])
+        eng.workspace[var] = eng.double(var_from_py)
+     ##   eng.set_param(eng.gcs() +'/'+ matlab_block,'Value',var)
         eng.set_param(gcs +'/'+ matlab_block,'Value',var,nargout=0)
     globals()['update_'+ var] = __temp__
 	
@@ -28,7 +31,7 @@ def sim_stop():
     global bdroot,eng
     eng.set_param(bdroot,'SimulationCommand','stop',nargout=0)
 def sim_start():
-    global bdroot,eng
+    global bdroot,engs
     eng.set_param(bdroot,'SimulationCommand','start',nargout=0)
 def sim_restart():
     global bdroot,eng
@@ -36,41 +39,61 @@ def sim_restart():
     eng.set_param(bdroot,'SimulationCommand','start',nargout=0)
 def sim_status():
     global bdroot,eng
-    eng.get_param(bdroot,'SimulationStatus',nargout=0)
+    return eng.get_param(bdroot,'SimulationStatus')
     #The software returns 'stopped', 'initializing', 'running', 'paused', 'compiled', 'updating', 'terminating', or 'external' (used with the Simulink Coder™ product).
 
-def python_terminal():
-    __terminal_states__ = ['quit','start','stop','restart','pause','resume','update']
+
+def prescan_terminal(User_states=[]):
+    __default_states__ = ['quit','exit','start','stop','restart','pause','resume','play','update','status']
+    __supported_states__ = __default_states__ + User_states
+    pattern = re.compile(r"[;, ]+")
     while True:
         __terminal_state__ = input('>> ').casefold()
-        if not(__terminal_state__ in __terminal_states__):
-            print('{} is not suported command, try again')
+        if not(__terminal_state__ in __supported_states__):
+            print('{} is not suported command, try again'.format(__terminal_state__))
             continue
         try:
-            if __terminal_state__ == 'quit':
+            if __terminal_state__ in ['quit','exit']:
                 print('Terminal quit successfully')
                 break
             if __terminal_state__ == 'start':
                 print('Simulation started')
                 sim_start()
+                continue
             if __terminal_state__ == 'stop':
-                print('Simulation restarted')
+                print('Simulation stopped')
                 sim_stop()
+                continue
             if __terminal_state__ == 'restart':
-                print('Simulation started')
+                print('Simulation restarted')
                 sim_restart()
+                continue
             if __terminal_state__ == 'pause':
-                print('Simulation started')
+                print('Simulation paused')
                 sim_pause()
-            if __terminal_state__ == 'resume':
-                print('Simulation started')
+                continue
+            if __terminal_state__ in ['resume','play']:
+                print('Simulation is running')
                 sim_continue()
+                continue
             if __terminal_state__ == 'update':
-                print('Simulation started')
+                print('Simulation updated')
                 sim_update()
+                continue
+            if __terminal_state__ == 'status':
+                print('Simulation status is {}'.format(sim_status()))
+                continue
+            # for user states :
+            print('Good')
+            print('Please enter arg or args for {}'.format(__terminal_state__))
+            user_args = input('{} args >> '.format(__terminal_state__)).strip()
+            pattern.split(user_args) 
+            user_args = pattern.split(user_args)
+            user_args = [float(i) if (i.replace('.','',1).isdigit()) else i for i in user_args ]
+            globals()[__terminal_state__](user_args)
                 
         except:
-            print('An error occurred')
+            print('An error occurred while running {}'.format(__terminal_state__))
             continue
         
         
@@ -84,8 +107,8 @@ import matlab.engine
 eng = matlab.engine.connect_matlab('MATLAB_PRESCAN_engine')
 #eng = None
 
-update_function('InitialVelocity','speed')
-
+def show(*args):
+    print(*args)
 
 try:
         
@@ -95,7 +118,15 @@ try:
 #    eng.set_param(gcs +'/'+ 'InitialVelocity','Value','speed')
 #    eng.sim_speed(nargout=0)
 #    eng.set_param('Experiment_3_cs/Audi_A8_Sedan_1/InitialVelocity','Value','speed',nargout=0)
-    prescan_terminal()
+    user_functions = []
+ 
+    update_function('InitialVelocity','speed')
+    user_functions.append('update_speed')
+
+    user_functions.append('show')
+    
+    
+    prescan_terminal(user_functions)
 
     print('The End')
 except:
