@@ -5,7 +5,10 @@ import time,re
 ExperimentName = "Experiment_3_cs"
 bdroot = "Experiment_3_cs"
 gcs = 'Experiment_3_cs/Audi_A8_Sedan_1'
-def update_function(matlab_block,var_str):
+def update_function(matlab_block,var_str=None):
+    if type(matlab_block) is type([]):
+        var_str = matlab_block[1]
+        matlab_block = matlab_block[0]
     def __temp__(var_from_py):
         global ExperimentName,gcs
         if type(var_from_py) is type([]):
@@ -52,7 +55,7 @@ def var(name,value=None):
     eng.workspace[name] = eng.double(value)
 
 
-def prescan_terminal(User_states=[]):
+def Prescan_terminal(User_states=[]):
     __default_states__ = ['quit','exit','start','stop','restart','pause','resume','play','update','status']
     __supported_states__ = __default_states__ + User_states
     pattern = re.compile(r"[;,= ]+")
@@ -140,16 +143,12 @@ try:
 #    eng.set_param(gcs +'/'+ 'InitialVelocity','Value','speed')
 #    eng.sim_speed(nargout=0)
 #    eng.set_param('Experiment_3_cs/Audi_A8_Sedan_1/InitialVelocity','Value','speed',nargout=0)
-    user_functions = []
+    user_functions = ['update_function','var','show']
  
     update_function('InitialVelocity','speed')
     user_functions.append('update_speed')
-
-    user_functions.append('show')
-    user_functions.append('var')
     
-    
-    prescan_terminal(user_functions)
+    Prescan_terminal(user_functions)
 
     print('The End')
 except:
