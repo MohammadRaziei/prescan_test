@@ -49,9 +49,9 @@ rto = get_param(block,'RuntimeObject');
 rto.InputPort(1).Data
 
 
-block_2 = 'Experiment_3_cs/Audi_A8_Sedan_1/To Workspace';
-rto_2 = get_param(block_2,'RuntimeObject');
-rto_2.InputPort(1).Data
+block = 'Experiment_3_cs/Audi_A8_Sedan_1/To Workspace';
+rto = get_param(block,'RuntimeObject');
+rto.InputPort(1).Data
 
 
 rto.InputPort(1).Data,  rto_2.InputPort(1).Data

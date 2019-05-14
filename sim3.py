@@ -1,6 +1,7 @@
 #import _thread as thread
 import threading
-import time,re
+import re
+from time import sleep
 
 ExperimentName = "Experiment_3_cs"
 bdroot = "Experiment_3_cs"
@@ -25,44 +26,44 @@ def save_json(data):
     with open(data + '.json', 'w') as f:
         json.dump(globals()[data], f, ensure_ascii=False)
         
-eng.prescan.experiment
+#eng.prescan.experiment
 
 def nargout(func):
     return int( eng.eval('nargout(@'+func+')') )
 
 
 def getDefaultFilename():
-    eng.prescan.experiment
-
-def getFieldValue():
-    eng.prescan.experiment
-
-
-def readDataModels():
-    eng.prescan.experiment.readDataModels()
-
-def replaceWorldObjectByName():
-    eng.prescan.experiment.replaceWorldObjectByName()
-
-def run():
-    print('run')
-
-def runWithDataModels():
-    eng.prescan.experiment.runWithDataModels()
-
-def setFieldValue():
-    eng.prescan.experiment.setFieldValue()
-
-validate
-
-def worldObjectsDeleteByName():
-    eng.prescan.experiment.worldObjectsDeleteByName()
-
-def worldObjectsDeleteByTypeId():
-    eng.prescan.experiment.worldObjectsDeleteByTypeId()
-
-    
-    
+    eng.prescan.experiment.getDefaultFilename
+#
+#def getFieldValue():
+#    eng.prescan.experiment
+#
+#
+#def readDataModels():
+#    eng.prescan.experiment.readDataModels()
+#
+#def replaceWorldObjectByName():
+#    eng.prescan.experiment.replaceWorldObjectByName()
+#
+#def run():
+#    print('run')
+#
+#def runWithDataModels():
+#    eng.prescan.experiment.runWithDataModels()
+#
+#def setFieldValue():
+#    eng.prescan.experiment.setFieldValue()
+#
+#validate
+#
+#def worldObjectsDeleteByName():
+#    eng.prescan.experiment.worldObjectsDeleteByName()
+#
+#def worldObjectsDeleteByTypeId():
+#    eng.prescan.experiment.worldObjectsDeleteByTypeId()
+#
+#    
+#    
     
 def sim_update():
     global bdroot,eng
@@ -87,20 +88,22 @@ def sim_status():
     global bdroot,eng
     return eng.get_param(bdroot,'SimulationStatus')
     #The software returns 'stopped', 'initializing', 'running', 'paused', 'compiled', 'updating', 'terminating', or 'external' (used with the Simulink Coder™ product).
+def sim_time():
+    global bdroot
+    return eng.get_param(bdroot,'SimulationTime')
+    
 
 
-
-
-def python2matlab(args*):
+def python2matlab(*args):
     for arg in args:
-        eng.workspace[arg] = matlab.double(locals()[arg])
+        eng.workspace[arg] = matlab.double(globals()[arg])
         
-def matlab2python(args*):
+def matlab2python(*args):
     for arg in args:
-        matlab.double(locals()[arg]) = eng.workspace[arg]
+        globals()[arg] = eng.workspace[arg]
         
-def pysim_update(args*):
-    python2matlab(args*)
+def pysim_update(*args):
+    python2matlab(*args)
     sim_update()
 
 def prescan_regenerate():
@@ -127,7 +130,7 @@ def var(name,value=None):
         name = name[0]
     eng.workspace[name] = eng.double(value)
 
-
+'''
 def Prescan_terminal(User_states=[]):
     __default_states__ = ['quit','exit','start','stop','restart','pause','resume','play','update','status']
     __supported_states__ = __default_states__ + User_states
@@ -193,8 +196,51 @@ def Prescan_terminal(User_states=[]):
         except:
             print('An error occurred while running {}'.format(__terminal_state__))
             continue
+'''
+'''   
+class Position:
+    global eng
+    def __init__(self):
+        self.block = 'Experiment_3_cs/Audi_A8_Sedan_1/To Workspace';
+        eng.eval("rto = get_param("+self.block+",'RuntimeObject');",nargout=0)
+
+    def get(self):
         
-        
+        try:
+            [[self.x],[self.y]] = eng.eval("rto.InputPort(1).Data")
+        except:
+            self.x = eng.eval('Positions.Data(1,end)')
+            self.y = eng.eval('Positions.Data(2,end)')
+    
+        return self.x,self.y
+'''
+
+def get_position(): 
+    if sim_status() in ['paused','stopped']:
+        x = eng.eval('Positions.Data(1,end)')
+        y = eng.eval('Positions.Data(2,end)')
+    else: 
+        try:
+            block = 'Experiment_3_cs/Audi_A8_Sedan_1/To Workspace';
+            eng.eval("rto = get_param('"+block+"','RuntimeObject');",nargout=0)
+            [[x],[y]] = eng.eval("rto.InputPort(1).Data")
+        except:
+            x = eng.eval('Positions.Data(1,end)')
+            y = eng.eval('Positions.Data(2,end)')
+    return x,y
+
+def run_senario():
+    global bdroot
+#    pos = Position()
+    sim_start()
+    for at in range(10):
+        sleep(2)
+        time = sim_time()
+        print("time : {}".format(time) )
+#        x,y = pos.get()
+        x, y = get_position()
+        print(x,y)
+    sim_stop()  
         
 #import matlab.engine
 #future = matlab.engine.connect_matlab(background=True)
@@ -203,6 +249,8 @@ import matlab.engine
 #future = matlab.engine.connect_matlab('MATLAB_PRESCAN_engine',background=True)
 #eng = future.result()
 eng = matlab.engine.connect_matlab('MATLAB_PRESCAN_engine')
+#eng = matlab.engine.connect_matlab()
+
 #eng = None
 
 def show(*args):
@@ -224,7 +272,7 @@ try:
 #    
 #    Prescan_terminal(user_functions)
     
-    
+    run_senario()
     
 
     print('The End')
