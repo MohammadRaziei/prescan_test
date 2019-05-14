@@ -39,30 +39,10 @@ get_param('Experiment_3_cs/Audi_A8_Sedan_1/','DialogParameters')
 get_param(block,'DialogParameters')
 
 get_param('Experiment_3_cs/Audi_A8_Sedan_1/Display','DialogParameters')
-aa = get_param('Experiment_3_cs/Audi_A8_Sedan_1/Display','ObjectParameters')
+ObjectParameters
 
 
-% % % % % % % % % % % % % % % % % % % % % % % % 
-% block = gcbh
-block = 'Experiment_3_cs/Audi_A8_Sedan_1/Display';
-rto = get_param(block,'RuntimeObject');
-rto.InputPort(1).Data
 
-
-block_2 = 'Experiment_3_cs/Audi_A8_Sedan_1/To Workspace';
-rto_2 = get_param(block_2,'RuntimeObject');
-rto_2.InputPort(1).Data
-
-
-rto.InputPort(1).Data,  rto_2.InputPort(1).Data
-
-
-% % % % % % % % % % % % % % % % % % % % % % 
-block = 'Experiment_3_cs/Audi_A8_Sedan_1/Terminator_6';
-rto = get_param(block,'RuntimeObject')
-rto.OutputPort(1).Data
-
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 set_param('Experiment_3_cs/Audi_A8_Sedan_1/SELF_Demux/Bus Selector','OutputAsBus','on')
 set_param('Experiment_3_cs/Audi_A8_Sedan_1/SELF_Demux/Bus Selector','OutputAsBus','on')
 

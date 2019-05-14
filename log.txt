@@ -1,0 +1,23 @@
+import matlab.engine
+eng = matlab.engine.connect_matlab('MATLAB_PRESCAN_engine')
+models = eng.prescan.experiment.readDataModels('Experiment_3.pb');
+print(models)
+import json
+import json
+def save_json(data):
+    with open(data + '.json', 'w') as f:
+        json.dump(globals()[data], f, ensure_ascii=False)
+save_json('models')
+a = {'a':1,'b':2}
+save_json('a')
+angle.model
+model.data
+models.data
+models = eng.prescan.experiment.readDataModels('Experiment_3.pb');
+models_json = eng.jsonencode(prescan.experiment.readDataModels('Experiment_3.pb') );
+models_json = eng.jsonencode(eng.prescan.experiment.readDataModels('Experiment_3.pb') );
+open 'models.json' as f
+with open('models.json','w') as f
+with open('models.json','w') as f:
+    f.write(models_json)
+    
