@@ -89,14 +89,46 @@ class Road(Model):
     def __init__(self, name):
         Model.__init__(self)
         self.name = name
-        self.id = objectsFindByName(name)
+        self.id = objectsFindByName(self, name)
         self.object = eng.eval("models.worldmodel.object{" + str( self.id ) + ", 1}.road; ")
         self.position = self.object['roadEnds'][0]['pose']['position']
         self.orientation =  self.object['roadEnds'][0]['pose']['orientation']
         self.length = self.object['straightRoad']['roadLength']
         self.numberOfLanes = len(self.object['roadEnds'][0]['laneEnds'])
         self.laneWidth = self.object['roadEnds'][0]['laneEnds']['width']
+        self.dict = {'name':self.name,'id':self.id, 
+                     'position':self.position,'orientation':self.orientation, 
+                     'length':self.length, 'numberOfLanes':self.numberOfLanes, 
+                     'laneWidth':self.laneWidth}
+ 
+class car(Model):
+    def __init__(self, name,road):
+        Model.__init__(self)
+        self.name = name
+        self.id = objectsFindByName(self, name)
+        self.road = road
         
+    def position(self,runtime = True):
+        if runtime == True:
+            if eng.exist('Positions') and ( sim_status() in ['paused','stopped'] ):
+                x = eng.eval('Positions.Data(1,end)')
+                y = eng.eval('Positions.Data(2,end)')
+            else: 
+                try:
+                    block = 'Experiment_3_cs/Audi_A8_Sedan_1/To Workspace';
+                    eng.eval("rto_positions = get_param('"+block+"','RuntimeObject');",nargout=0)
+                    [[x],[y]] = eng.eval("rto_positions.InputPort(1).Data")
+                except:
+                    x = eng.eval('Positions.Data(1,end)')
+                    y = eng.eval('Positions.Data(2,end)')
+            return x,y
+        else:
+            if eng.exist('Positions') and ( sim_status() in ['paused','stopped'] ):
+                data = eng.eval('Positions.Data')
+                return data
+    def examinLane(self,road = None):
+        __road__ = road if road is not None else self.road        
+       
 #    
 #    
     
