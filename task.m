@@ -1,4 +1,4 @@
-% experiment_system = load_system('Experiment_3_cs');
+            % experiment_system = load_system('Experiment_3_cs');
 models = prescan.experiment.readDataModels('Experiment_3.pb');
 % % prescan.experiment.writeDataModels(models);
 % simOut = prescan.experiment.runWithDataModels(models);

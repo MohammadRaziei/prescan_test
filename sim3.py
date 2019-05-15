@@ -6,6 +6,9 @@ from time import sleep
 ExperimentName = "Experiment_3_cs"
 bdroot = "Experiment_3_cs"
 gcs = 'Experiment_3_cs/Audi_A8_Sedan_1'
+
+
+
 def update_function(matlab_block,var_str=None):
     if type(matlab_block) is type([]):
         var_str = matlab_block[1]
@@ -62,6 +65,38 @@ def getDefaultFilename():
 #def worldObjectsDeleteByTypeId():
 #    eng.prescan.experiment.worldObjectsDeleteByTypeId()
 #
+
+#road_obj = models.worldmodel.object{prescan.worldmodel.objectsFindByName(models.worldmodel, 'StraightRoad_1') , 1}.road;
+def objectsFindByName(name):
+    eng.eval("models = prescan.experiment.readDataModels('Experiment_3.pb');",nargout=0)
+    return int(eng.eval("prescan.worldmodel.objectsFindByName(models.worldmodel, '"+name+"')") )
+ 
+def road_obj(name='StraightRoad_1'):
+    return eng.eval("models.worldmodel.object{" + str(objectsFindByName(name) ) + ", 1}.road; ")
+def road_position(name='StraightRoad_1'):
+    return road_obj(name)['roadEnds'][0]['pose']['position']
+def road_length(name='StraightRoad_1'):
+    return road_obj(name)['straightRoad']['roadLength']
+def numberOfLanes(name='StraightRoad_1'):
+    return len (road_obj(name)['roadEnds'][0]['laneEnds'])
+
+
+class Model():
+    def __init__(self):
+        eng.eval("models = prescan.experiment.readDataModels('Experiment_3.pb');",nargout=0)
+
+class Road(Model):
+    def __init__(self, name):
+        Model.__init__(self)
+        self.name = name
+        self.id = objectsFindByName(name)
+        self.object = eng.eval("models.worldmodel.object{" + str( self.id ) + ", 1}.road; ")
+        self.position = self.object['roadEnds'][0]['pose']['position']
+        self.orientation =  self.object['roadEnds'][0]['pose']['orientation']
+        self.length = self.object['straightRoad']['roadLength']
+        self.numberOfLanes = len(self.object['roadEnds'][0]['laneEnds'])
+        self.laneWidth = self.object['roadEnds'][0]['laneEnds']['width']
+        
 #    
 #    
     
@@ -214,16 +249,23 @@ class Position:
     
         return self.x,self.y
 '''
+class Test:
+    def __init__(self):
+        print('hi')
+    def run(self):
+        print('run')
+        print(eng.sqrt(4.0))
 
 def get_position(): 
-    if sim_status() in ['paused','stopped']:
+    
+    if eng.exist('Positions') and ( sim_status() in ['paused','stopped'] ):
         x = eng.eval('Positions.Data(1,end)')
         y = eng.eval('Positions.Data(2,end)')
     else: 
         try:
             block = 'Experiment_3_cs/Audi_A8_Sedan_1/To Workspace';
-            eng.eval("rto = get_param('"+block+"','RuntimeObject');",nargout=0)
-            [[x],[y]] = eng.eval("rto.InputPort(1).Data")
+            eng.eval("rto_positions = get_param('"+block+"','RuntimeObject');",nargout=0)
+            [[x],[y]] = eng.eval("rto_positions.InputPort(1).Data")
         except:
             x = eng.eval('Positions.Data(1,end)')
             y = eng.eval('Positions.Data(2,end)')
@@ -239,7 +281,7 @@ def run_senario():
         print("time : {}".format(time) )
 #        x,y = pos.get()
         x, y = get_position()
-        print(x,y)
+        print('\tx = {}\n\ty = {}'.format(x,y))
     sim_stop()  
         
 #import matlab.engine
@@ -248,40 +290,22 @@ def run_senario():
 import matlab.engine
 #future = matlab.engine.connect_matlab('MATLAB_PRESCAN_engine',background=True)
 #eng = future.result()
-eng = matlab.engine.connect_matlab('MATLAB_PRESCAN_engine')
+try:
+    eng = matlab.engine.connect_matlab('MATLAB_PRESCAN_engine')
+except:
+    pass
 #eng = matlab.engine.connect_matlab()
 
-#eng = None
-
-def show(*args):
-    print(*args)
-
 try:
-        
-#    print( eng.get_param(gcs +'/InitialVelocity','Value') )
-#    update_speed(5)
-#    eng.workspace['speed'] = eng.double(8)
-#    eng.set_param(gcs +'/'+ 'InitialVelocity','Value','speed')
-#    eng.sim_speed(nargout=0)
-#    eng.set_param('Experiment_3_cs/Audi_A8_Sedan_1/InitialVelocity','Value','speed',nargout=0)
-#########################
-#
-#    user_functions = ['update_function','var','show']
-#    update_function('InitialVelocity','speed')
-#    user_functions.append('update_speed')
-#    
-#    Prescan_terminal(user_functions)
+
     
-    run_senario()
+#    run_senario()
     
 
     print('The End')
 except:
-    eng.quit()
-    
-#sim_start();
-#time.sleep(5)
-#sim_stop();
-eng.quit()
-# -*- coding: utf-8 -*-
+#    eng.quit()
+    pass
+
+#eng.quit()
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Experiment xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Description="" id="Experiment_3" UniqueId="0" TotalSimulationTime="80" Built="true" EnableCollisionDetection="true" MaxNumberOfCollisions="5" EnableTestAutomation="false" Generate3DTrajectories="false" VisualizeSensorBeams="false" VisualizeBoundingBoxes="false" Parsed="true" PrecipitationRandomSeed="0" PRESCANVersion="8.4.0" ResourcesDir="Resources" SensorRandomSeed="0" SimulationGenerationHash="4F8383B4027BDFF8255CC7325290D58C57C5A033E718782766461E183A4E89B4" UniqueExperimentIdentifier="d8c81b62-32c3-49c3-b2be-9212541d57b2" UniqueIdCounter="147" VisuAidMaxRenderingDistance="750" VisuAidMinRenderingDistance="0.1" WeatherTypeName="None">
+<Experiment xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Description="" id="Experiment_3" UniqueId="0" TotalSimulationTime="80" Built="true" EnableCollisionDetection="true" MaxNumberOfCollisions="5" EnableTestAutomation="false" Generate3DTrajectories="false" VisualizeSensorBeams="false" VisualizeBoundingBoxes="false" Parsed="true" PrecipitationRandomSeed="0" PRESCANVersion="8.4.0" ResourcesDir="Resources" SensorRandomSeed="0" SimulationGenerationHash="24ED412840A3F5B0AA9C6E2F927EA612F79526FA8A1BD3C87E6B1D6851DEEE8B" UniqueExperimentIdentifier="408efdad-4110-49c5-8cca-f844a542f5a2" UniqueIdCounter="161" VisuAidMaxRenderingDistance="750" VisuAidMinRenderingDistance="0.1" WeatherTypeName="None">
   <Actors>
     <Actor xsi:type="GenericModel" Description="A model of an Audi A8 Sedan" id="Audi_A8_Sedan_1" UniqueId="45" SensorIDDetection="true" NumericalID="4" ObjectTypeID="1" ParticipateInCollisionDetection="true" DynamicsConfiguration="Simple" DiscreteModeActivated="false" Reference="false" UserSpecifiedControl="false" JavaClass="" PhysicsSimpleDynamicsInteraction="PhysicsInheritsFromSD" ActorKind="Audi_A8_Sedan" AnimatedActor="false" CompilationSheetPicture="Audi_A8_HighPoly.png" HashCode="509bb86b9413aaa00b0042cf0de235f7" ModelFile="Vehicles\Audi_A8\Audi_A8.osgb" SupportedDynamics="None Simple SimpleTD UserSpecified">
       <Location X="-48.885082244873047" Y="46.105915069580078" Z="0.550000011920929" />
@@ -653,7 +653,7 @@
             <TestAutomationVariable VariableName="MisAlignMountOrient" VariableState="false" />
           </TestAutomationVariables>
           <CameraSensorCameras>
-            <CameraSensorCamera Description="" id="" UniqueId="141" SubCamPosition="Center">
+            <CameraSensorCamera Description="" id="" UniqueId="159" SubCamPosition="Center">
               <DriftCamera PosX="0" PosY="0" PosZ="0" OrientX="0" OrientY="0" OrientZ="0" DriftTypePosX="None" DriftTypePosY="None" DriftTypePosZ="None" DriftTypeOrientX="None" DriftTypeOrientY="None" DriftTypeOrientZ="None" />
               <NoiseCamera PosX="0" PosY="0" PosZ="0" OrientX="0" OrientY="0" OrientZ="0" />
               <MisAlignCamera PosX="0" PosY="0" PosZ="0" OrientX="0" OrientY="0" OrientZ="0" />
@@ -1446,7 +1446,7 @@
       <VehicleGeometry TrackWidthFront="1.6119999885559082" TrackWidthRear="1.6119999885559082" TyreRadius="0.34000000357627869" Wheelbase="2.940000057220459" />
     </Actor>
     <Actor xsi:type="GenericModel" Description="A model of a BMW X5" id="BMW_X5_SUV_1" UniqueId="144" SensorIDDetection="true" NumericalID="18" ObjectTypeID="1" ParticipateInCollisionDetection="true" DynamicsConfiguration="Simple" DiscreteModeActivated="false" Reference="false" UserSpecifiedControl="false" JavaClass="" PhysicsSimpleDynamicsInteraction="PhysicsInheritsFromSD" ActorKind="BMW_X5_SUV" AnimatedActor="false" CompilationSheetPicture="BMW_X5_HighPoly.png" HashCode="8991b83ece3e1a5e16ea914896c5b3c5" ModelFile="Vehicles\BMW_X5\BMW_X5.osgb" SupportedDynamics="None Simple SimpleTD UserSpecified">
-      <Location X="-49.383346557617188" Y="52.391403198242188" Z="0.68999999761581421" />
+      <Location X="0.11288166046142578" Y="45.802692413330078" Z="0.68999999761581421" />
       <Orientation Bank="0" Tilt="0" Heading="0" />
       <Origin X="0.2199999988079071" Y="0.5" Z="0" />
       <Size X="4.7899999618530273" Y="2.1700000762939453" Z="1.7200000286102295" />
@@ -2189,7 +2189,7 @@
             <TestAutomationVariable VariableName="MisAlignMountOrient" VariableState="false" />
           </TestAutomationVariables>
           <CameraSensorCameras>
-            <CameraSensorCamera Description="" id="" UniqueId="146" SubCamPosition="Center">
+            <CameraSensorCamera Description="" id="" UniqueId="160" SubCamPosition="Center">
               <DriftCamera PosX="0" PosY="0" PosZ="0" OrientX="0" OrientY="0" OrientZ="0" DriftTypePosX="None" DriftTypePosY="None" DriftTypePosZ="None" DriftTypeOrientX="None" DriftTypeOrientY="None" DriftTypeOrientZ="None" />
               <NoiseCamera PosX="0" PosY="0" PosZ="0" OrientX="0" OrientY="0" OrientZ="0" />
               <MisAlignCamera PosX="0" PosY="0" PosZ="0" OrientX="0" OrientY="0" OrientZ="0" />
@@ -3043,7 +3043,7 @@
   <Environment Description="" id="Environment" UniqueId="3">
     <Underlays>
       <Underlay xsi:type="Grass" Description="" id="Grass_1" UniqueId="23" SensorIDDetection="false" NumericalID="3" ObjectTypeID="17" ParticipateInCollisionDetection="false" MapDistance="1" RealDistance="1">
-        <Location X="596.71443176269531" Y="60.884227752685547" Z="0" />
+        <Location X="596.71443176269531" Y="60.88422775268554" Z="0" />
         <Orientation Bank="0" Tilt="0" Heading="0" />
         <Origin X="0.5" Y="0.5" Z="0" />
         <Size X="2560" Y="2560" Z="0.0099999997764825821" />

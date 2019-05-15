@@ -30,6 +30,11 @@ block = 'Experiment_3_cs/Audi_A8_Sedan_1/To Workspace';
 rto = get_param(block, 'RuntimeObject');
 time = rto.OutputPort(1).Data;
 
+
+block = 'Experiment_3_cs/Scope1';
+s = get_param(block, 'DialogParameters')
+
+
 block_2 = 'Experiment_3_cs/Audi_A8_Sedan_1/SELF_Demux';
 rto_2 = get_param(block_2, 'RuntimeObject');
 
