@@ -82,32 +82,48 @@ def numberOfLanes(name='StraightRoad_1'):
 
 
 class Model():
-    def __init__(self):
-        eng.eval("models = prescan.experiment.readDataModels('Experiment_3.pb');",nargout=0)
-
-class Road(Model):
     def __init__(self, name):
-        Model.__init__(self)
+        eng.eval("models = prescan.experiment.readDataModels('Experiment_3.pb');",nargout=0)
         self.name = name
         self.id = objectsFindByName(self, name)
-        self.object = eng.eval("models.worldmodel.object{" + str( self.id ) + ", 1}.road; ")
-        self.position = self.object['roadEnds'][0]['pose']['position']
-        self.orientation =  self.object['roadEnds'][0]['pose']['orientation']
-        self.length = self.object['straightRoad']['roadLength']
-        self.numberOfLanes = len(self.object['roadEnds'][0]['laneEnds'])
-        self.laneWidth = self.object['roadEnds'][0]['laneEnds']['width']
+        self.object = eng.eval("models.worldmodel.object{" + str( self.id ) + ", 1} ")
+        self.position = self.object['pose']['position']
+        self.orientation =  self.object['pose']['orientation']
         self.dict = {'name':self.name,'id':self.id, 
                      'position':self.position,'orientation':self.orientation, 
                      'length':self.length, 'numberOfLanes':self.numberOfLanes, 
                      'laneWidth':self.laneWidth}
+    def objectsFindByName(self,name):
+        return int(eng.eval("prescan.worldmodel.objectsFindByName(models.worldmodel, '"+name+"')") )
+ 
+class Road(Model):
+    def __init__(self, name):
+        Model.__init__(self)
+#        self.name = name
+#        self.id = objectsFindByName(self, name)
+##       self.object = eng.eval("models.worldmodel.object{" + str( self.id ) + ", 1}.road; ")
+##       self.position = self.object['roadEnds'][0]['pose']['position']       
+##        self.orientation =  self.object['roadEnds'][0]['pose']['orientation']
+#        self.object = eng.eval("models.worldmodel.object{" + str( self.id ) + ", 1} ")
+#        self.position = self.object['pose']['position']
+#        self.orientation =  self.object['pose']['orientation']
+
+        self.length = self.object['road']['straightRoad']['roadLength']
+        self.numberOfLanes = len(self.object['road']['roadEnds'][0]['laneEnds'])
+        self.laneWidth = self.object['road']['roadEnds'][0]['laneEnds']['width']
+#        self.dict = {'name':self.name,'id':self.id, 
+#                     'position':self.position,'orientation':self.orientation, 
+#                     'length':self.length, 'numberOfLanes':self.numberOfLanes, 
+#                     'laneWidth':self.laneWidth}
+        self.dict = {'length':self.length, 'numberOfLanes':self.numberOfLanes, 'laneWidth':self.laneWidth}
+        self.dict = {**Model.dict,**self.dict}
  
 class car(Model):
     def __init__(self, name,road):
-        Model.__init__(self)
-        self.name = name
-        self.id = objectsFindByName(self, name)
+        Model.__init__(self,name)
         self.road = road
-        
+        self.dict = {'road_name':road.name}
+        self.dict = {**Model.dict,**self.dict}       
     def position(self,runtime = True):
         if runtime == True:
             if eng.exist('Positions') and ( sim_status() in ['paused','stopped'] ):
