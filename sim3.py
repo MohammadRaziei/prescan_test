@@ -1,5 +1,5 @@
 #import _thread as thread
-import threading
+import numpy as np
 import re
 from time import sleep
 
@@ -39,15 +39,15 @@ def getDefaultFilename():
     eng.prescan.experiment.getDefaultFilename
 #
 #def getFieldValue():
-#    eng.prescan.experiment
 #
 #
 #def readDataModels():
 #    eng.prescan.experiment.readDataModels()
 #
-#def replaceWorldObjectByName():
+#    eng.prescan.experiment
 #    eng.prescan.experiment.replaceWorldObjectByName()
 #
+#def replaceWorldObjectByName():
 #def run():
 #    print('run')
 #
@@ -119,7 +119,7 @@ class Road(Model):
         self.dict = {**Model.dict,**self.dict}
  
 class car(Model):
-    def __init__(self, name,road):
+    def __init__(self, name,road = None):
         Model.__init__(self,name)
         self.road = road
         self.dict = {'road_name':road.name}
@@ -142,9 +142,23 @@ class car(Model):
             if eng.exist('Positions') and ( sim_status() in ['paused','stopped'] ):
                 data = eng.eval('Positions.Data')
                 return data
+    def position_road(self,road = None):
+        __road__ = road if road is not None else self.road 
+        car_x, car_y = self.position()
+        pos_x = car_x -  __road__.position['x']
+        pos_y = car_y -  __road__.position['y']
+        self.road_pos = pos_x, pos_y
+        return self.road_pos 
+        
+
     def examinLane(self,road = None):
         __road__ = road if road is not None else self.road        
-       
+        pos_y = self.position_road()[1] 
+        pos_y_offset = 1 if pos_y > 0 else 0
+        lane = np.floor(pos_y/__road__.laneWidth) + pos_y_offset
+        return lane
+
+        
 #    
 #    
     
