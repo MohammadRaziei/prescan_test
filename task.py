@@ -179,8 +179,9 @@ def run_senario():
             elif lane == -road.numberOfLanes / 2:
                 RL = np.random.randint(0,2)
             else :
-                RL = np.random.randint(-1,2)            
+                RL = np.random.randint(-1,2) 
             print('lane = {} -> RL = {}'.format(lane,RL))
+            RL = RL * road.laneWidth
             pysim_update('RL')
             if not car.is_in_road():
                 sim_restart()
