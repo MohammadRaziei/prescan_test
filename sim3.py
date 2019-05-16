@@ -3,8 +3,8 @@ import numpy as np
 import re
 from time import sleep
 
-ExperimentName = "Experiment_3_cs"
-bdroot = "Experiment_3_cs"
+ExperimentName = "Experiment_3"
+bdroot = ExperimentName+"_cs"
 gcs = 'Experiment_3_cs/Audi_A8_Sedan_1'
 
 
@@ -70,7 +70,7 @@ def getDefaultFilename():
 def objectsFindByName(name):
     eng.eval("models = prescan.experiment.readDataModels('Experiment_3.pb');",nargout=0)
     return int(eng.eval("prescan.worldmodel.objectsFindByName(models.worldmodel, '"+name+"')") )
- 
+''' 
 def road_obj(name='StraightRoad_1'):
     return eng.eval("models.worldmodel.object{" + str(objectsFindByName(name) ) + ", 1}.road; ")
 def road_position(name='StraightRoad_1'):
@@ -79,11 +79,13 @@ def road_length(name='StraightRoad_1'):
     return road_obj(name)['straightRoad']['roadLength']
 def numberOfLanes(name='StraightRoad_1'):
     return len (road_obj(name)['roadEnds'][0]['laneEnds'])
-
+'''
 
 class Model():
+    global ExperimentName,bdroot
+    
     def __init__(self, name):
-        eng.eval("models = prescan.experiment.readDataModels('Experiment_3.pb');",nargout=0)
+        eng.eval("models = prescan.experiment.readDataModels('"+ExperimentName+".pb');",nargout=0)
         self.name = name
         self.id = objectsFindByName(self, name)
         self.object = eng.eval("models.worldmodel.object{" + str( self.id ) + ", 1} ")
@@ -93,6 +95,8 @@ class Model():
                      'position':self.position,'orientation':self.orientation, 
                      'length':self.length, 'numberOfLanes':self.numberOfLanes, 
                      'laneWidth':self.laneWidth}
+        self.__str__ = self.name
+        self.__repr__ = self.name
     def objectsFindByName(self,name):
         return int(eng.eval("prescan.worldmodel.objectsFindByName(models.worldmodel, '"+name+"')") )
  
@@ -118,7 +122,7 @@ class Road(Model):
         self.dict = {'length':self.length, 'numberOfLanes':self.numberOfLanes, 'laneWidth':self.laneWidth}
         self.dict = {**Model.dict,**self.dict}
  
-class car(Model):
+class Car(Model):
     def __init__(self, name,road = None):
         Model.__init__(self,name)
         self.road = road
@@ -131,7 +135,7 @@ class car(Model):
                 y = eng.eval('Positions.Data(2,end)')
             else: 
                 try:
-                    block = 'Experiment_3_cs/Audi_A8_Sedan_1/To Workspace';
+                    block = self.bdroot+'/'+ self.name +'/To Workspace';
                     eng.eval("rto_positions = get_param('"+block+"','RuntimeObject');",nargout=0)
                     [[x],[y]] = eng.eval("rto_positions.InputPort(1).Data")
                 except:
@@ -149,8 +153,16 @@ class car(Model):
         pos_y = car_y -  __road__.position['y']
         self.road_pos = pos_x, pos_y
         return self.road_pos 
+    
+    def is_in_road(self,road = None):
+        __road__ = road if road is not None else self.road 
+        pos_x, pos_y = self.position_road(__road__)
+        if abs(pos_y) >= __road__.numberOfLanes * __road__.laneWidth / 2:
+            return False
+        if pos_x < 0 or pos_x > __road__.length:
+            return False
+        return True
         
-
     def examinLane(self,road = None):
         __road__ = road if road is not None else self.road        
         pos_y = self.position_road()[1] 
@@ -336,15 +348,32 @@ def get_position():
 def run_senario():
     global bdroot
 #    pos = Position()
+    road = Road()
+    car = Car('Audi_A8_Sedan_1',road)
+    print(car,road)
+    
     sim_start()
-    for at in range(10):
-        sleep(2)
-        time = sim_time()
-        print("time : {}".format(time) )
-#        x,y = pos.get()
-        x, y = get_position()
-        print('\tx = {}\n\ty = {}'.format(x,y))
-    sim_stop()  
+    for i in range(2):
+        while True:
+            sleep(2)
+            time = sim_time()
+            print("time : {}".format(time) )
+    #        x,y = pos.get()
+            x, y = car.position_road()
+            lane = car.examinLane()
+            if lane == road.numberOfLanes / 2:
+                RL = np.random.randint(-1,1)
+            elif lane == -road.numberOfLanes / 2:
+                RL = np.random.randint(0,2)
+            else :
+                RL = np.random.randint(-1,2)            
+            print('lane = {} -> RL = {}'.format(lane,RL))
+            pysim_update('RL')
+            if not car.is_in_road():
+                sim_restart()
+            
+            print('\tx = {}\n\ty = {}'.format(x,y))
+        sim_stop()  
         
 #import matlab.engine
 #future = matlab.engine.connect_matlab(background=True)
@@ -356,12 +385,11 @@ try:
     eng = matlab.engine.connect_matlab('MATLAB_PRESCAN_engine')
 except:
     pass
-#eng = matlab.engine.connect_matlab()
 
 try:
 
     
-#    run_senario()
+    run_senario()
     
 
     print('The End')
