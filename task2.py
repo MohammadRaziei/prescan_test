@@ -1,10 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat May 18 15:46:42 2019
+
+@author: MohammadRaziei
+"""
+
 import numpy as np
 import re
 from time import sleep
-
-ExperimentName = "Experiment_3"
-bdroot = ExperimentName+"_cs"
-gcs = 'Experiment_3_cs/Audi_A8_Sedan_1'
+import prescan
 
 
 
@@ -18,117 +22,46 @@ def nargout(func):
     return int( eng.eval('nargout(@'+func+')') )
 
 
-def getDefaultFilename():
-    eng.prescan.experiment.getDefaultFilename
-
-
-def objectsFindByName(name):
-    eng.eval("models = prescan.experiment.readDataModels('"+ExperimentName+".pb');",nargout=0)
-    return int(eng.eval("prescan.worldmodel.objectsFindByName(models.worldmodel, '"+name+"')") )
-
-    
-def sim_update():
-    global bdroot,eng
-    eng.set_param(bdroot,'SimulationCommand','update',nargout=0)
-def sim_pause(): 
-    global bdroot,eng
-    eng.set_param(bdroot,'SimulationCommand','pause',nargout=0)
-def sim_continue():
-    global bdroot,eng
-    eng.set_param(bdroot,'SimulationCommand','continue',nargout=0)
-def sim_stop():
-    global bdroot,eng
-    eng.set_param(bdroot,'SimulationCommand','stop',nargout=0)
-def sim_start():
-    global bdroot,engs
-    eng.set_param(bdroot,'SimulationCommand','start',nargout=0)
-def sim_restart():
-    global bdroot,eng
-    eng.set_param(bdroot,'SimulationCommand','stop',nargout=0)
-    eng.set_param(bdroot,'SimulationCommand','start',nargout=0)
-def sim_status():
-    global bdroot,eng
-    return eng.get_param(bdroot,'SimulationStatus')
-    #The software returns 'stopped', 'initializing', 'running', 'paused', 'compiled', 'updating', 'terminating', or 'external' (used with the Simulink Coder™ product).
-def sim_time():
-    global bdroot
-    return eng.get_param(bdroot,'SimulationTime')
-    
-
-
-def python2matlab(**args):
-    for key,value in args.items():
-        eng.workspace[key] = matlab.double(value)
-        
-def matlab2python(*args):
-    for arg in args:
-        globals()[arg] = eng.workspace[arg]
-        
-def pysim_update(**args):
-    python2matlab(**args)
-    sim_update()
-
-def prescan_regenerate():
-    global bdroot,eng
-    eng.generate_all(bdroot)
-           
 
 
 
 
 class Model():
     global ExperimentName,bdroot
-    __shared_flags__ = {'create_model':False}
-    def __init__(self, name, model):
-        
+    
+    def __init__(self, name):
+        eng.eval("models = prescan.experiment.readDataModels('"+ExperimentName+".pb');",nargout=0)
         self.name = name
-        self.model = model
-        self.id = Model.objectsFindByName(name)
+        self.id = objectsFindByName(name)
         self.object = eng.eval("models.worldmodel.object{" + str( self.id ) + ", 1} ")
         self.position = self.object['pose']['position']
         self.orientation =  self.object['pose']['orientation']
-#        self.items = {'name':self.name,'id':self.id, 
-#                     'position':self.position,'orientation':self.orientation}
-
-    def create_model():
-        eng.eval("models = prescan.experiment.readDataModels('"+Model.ExperimentName+".pb');",nargout=0)
-   
-    def create_model_ones(self):
-        if ( not Model.__shared_flags__['create_model'] ) and (eng.exist('models') == 1):
-            self.create_model()
-            Model.__shared_flags__['create_model'] = True
-    
-    def objectsFindByName(name):
-        return int(eng.eval("prescan.worldmodel.objectsFindByName(models.worldmodel, '"+name+"')") )
-   
+        self.items = {'name':self.name,'id':self.id, 
+                     'position':self.position,'orientation':self.orientation}
     def __str__(self):
         return self.name
-    def __repr__(self):
-        return '{}({})'.format(self.model,self.name)
-    
-    
+    def objectsFindByName(name):
+        return int(eng.eval("prescan.worldmodel.objectsFindByName(models.worldmodel, '"+name+"')") )
+
 class Road(Model):
     def __init__(self, name = 'StraightRoad_1'):
-        Model.__init__(self,name,'Road')
+        Model.__init__(self,name)
         self.length = self.object['road']['straightRoad']['roadLength']
         self.numberOfLanes = len(self.object['road']['roadEnds'][0]['laneEnds'])
         self.laneWidth = self.object['road']['roadEnds'][0]['laneEnds'][0]['width']
-#        items = {'length':self.length, 'numberOfLanes':self.numberOfLanes, 'laneWidth':self.laneWidth}
-#        self.items = {**self.items,**items}
+        items = {'length':self.length, 'numberOfLanes':self.numberOfLanes, 'laneWidth':self.laneWidth}
+        self.items = {**self.items,**items}
 class Car(Model):
     def __init__(self, name,road = None):
-        Model.__init__(self,name,'Car')
+        Model.__init__(self,name)
         self.road = road
-#        items = {'road_name':road.name}
-#        self.items = {**self.items,**items}       
+        items = {'road_name':road.name}
+        self.items = {**self.items,**items}       
     def get_position(self,runtime = True):
         if runtime == True:
-#            if eng.exist('Positions') and ( sim_status() in ['paused','stopped'] ):
-#                x = eng.eval('Positions.Data(1,end)')
-#                y = eng.eval('Positions.Data(2,end)')
-            if sim_status() is 'stopped':
-                x = self.position['x']
-                y = self.position['y']          
+            if eng.exist('Positions') and ( sim_status() in ['paused','stopped'] ):
+                x = eng.eval('Positions.Data(1,end)')
+                y = eng.eval('Positions.Data(2,end)')
             else: 
                 try:
                     block = self.bdroot+'/'+ self.name +'/To Workspace';
@@ -195,9 +128,10 @@ def run_senario():
                 RL = np.random.randint(0,2)
             else :
                 RL = np.random.randint(-1,2) 
+            globals()['RL'] = RL
             print('lane = {} -> RL = {}'.format(lane,RL))
             RL = RL * road.laneWidth
-            pysim_update(RL=RL)
+            pysim_update('RL')
             if not car.is_in_road():
                 sim_restart()
             

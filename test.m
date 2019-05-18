@@ -16,3 +16,5 @@ objectName = prescan.experiment.getFieldValue(models.worldmodel.object, 'name');
 disp('The content of the field "name" is:');
 disp(objectName)
 
+RL = 10
+set_param('Experiment_3_cs','SimulationCommand','update')
