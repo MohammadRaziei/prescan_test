@@ -58,7 +58,7 @@ def sim_time():
 
 def python2matlab(**args):
     for key,value in args.items():
-        eng.workspace[key] = matlab.double(value)
+        eng.workspace[key] = eng.double(value)
         
 def matlab2python(*args):
     for arg in args:
@@ -78,9 +78,11 @@ def prescan_regenerate():
 
 class Model():
     global ExperimentName,bdroot
+#    __ExperimentName__  = ExperimentName
+#    __bdroot__ = bdroot
     __shared_flags__ = {'create_model':False}
     def __init__(self, name, model):
-        
+        self.create_model_ones()
         self.name = name
         self.model = model
         self.id = Model.objectsFindByName(name)
@@ -91,11 +93,11 @@ class Model():
 #                     'position':self.position,'orientation':self.orientation}
 
     def create_model():
-        eng.eval("models = prescan.experiment.readDataModels('"+Model.ExperimentName+".pb');",nargout=0)
+        eng.eval("models = prescan.experiment.readDataModels('"+ ExperimentName +".pb');",nargout=0)
    
     def create_model_ones(self):
-        if ( not Model.__shared_flags__['create_model'] ) and (eng.exist('models') == 1):
-            self.create_model()
+        if ( not Model.__shared_flags__['create_model'] ) and (eng.exist('models') != 1):
+            Model.create_model()
             Model.__shared_flags__['create_model'] = True
     
     def objectsFindByName(name):
@@ -104,7 +106,7 @@ class Model():
     def __str__(self):
         return self.name
     def __repr__(self):
-        return '{}({})'.format(self.model,self.name)
+        return '{}({!r})'.format(self.model,self.name)
     
     
 class Road(Model):
@@ -126,12 +128,12 @@ class Car(Model):
 #            if eng.exist('Positions') and ( sim_status() in ['paused','stopped'] ):
 #                x = eng.eval('Positions.Data(1,end)')
 #                y = eng.eval('Positions.Data(2,end)')
-            if sim_status() is 'stopped':
+            if sim_status() == 'stopped':
                 x = self.position['x']
                 y = self.position['y']          
             else: 
                 try:
-                    block = self.bdroot+'/'+ self.name +'/To Workspace';
+                    block = bdroot+'/'+ self.name +'/To Workspace';
                     eng.eval("rto_positions = get_param('"+block+"','RuntimeObject');",nargout=0)
                     [[x],[y]] = eng.eval("rto_positions.InputPort(1).Data")
                 except:
@@ -162,8 +164,9 @@ class Car(Model):
     def examinLane(self,road = None):
         __road__ = road if road is not None else self.road        
         pos_y = self.get_position_road()[1] 
-        pos_y_offset = 1 if pos_y > 0 else 0
-        lane = np.floor(pos_y/__road__.laneWidth) + pos_y_offset
+#        pos_y_offset = 1 if pos_y > 0 else 0
+        pos_y_offset = __road__.laneWidth / 2 - 1
+        lane = int(np.floor(pos_y/__road__.laneWidth) + pos_y_offset)
         return lane
 
         
@@ -173,37 +176,46 @@ class Car(Model):
 
 
 
-#---------------------------------------------------------
+#----------------------------------------------------------
 
 def run_senario():
     global bdroot
     road = Road('StraightRoad_1')
     car = Car('Audi_A8_Sedan_1',road)
-    print(car,road)
+    print('{!r}\t{!r}'.format(car,road))
     
-    sim_start()
+    sim_restart()
+    print('>> Start')
+    
+    lane_start = car.examinLane() 
+    print('lane_start : {}'.format(lane_start))
     for i in range(2):
+        RL = 0
         while True:
             sleep(2)
             time = sim_time()
             print("time : {}".format(time) )
             x, y = car.get_position_road()
             lane = car.examinLane()
-            if lane == road.numberOfLanes / 2:
-                RL = np.random.randint(-1,1)
-            elif lane == -road.numberOfLanes / 2:
-                RL = np.random.randint(0,2)
+            RL /= road.laneWidth
+            if lane == road.numberOfLanes - 1:
+                RL += np.random.randint(-1,1)
+            elif lane == 0:
+                RL += np.random.randint(0,2)
             else :
-                RL = np.random.randint(-1,2) 
+                RL += np.random.randint(-1,2) 
+            RL -= lane_start
             print('lane = {} -> RL = {}'.format(lane,RL))
+            print('\tx = {}\n\ty = {}'.format(x,y))
             RL = RL * road.laneWidth
             pysim_update(RL=RL)
             if not car.is_in_road():
                 sim_restart()
-            
-            print('\tx = {}\n\ty = {}'.format(x,y))
-        sim_stop()  
+                print('>> Restart')
+                continue
         
+        sim_stop()  
+        print('>> Stop')
 ###########################################################
 import matlab.engine
 try:
