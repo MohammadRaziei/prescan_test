@@ -163,10 +163,10 @@ class Car(Model):
         
     def examinLane(self,road = None):
         __road__ = road if road is not None else self.road        
-        pos_y = self.get_position_road()[1] 
+        pos_y = self.get_position_road()[1] / __road__.laneWidth
 #        pos_y_offset = 1 if pos_y > 0 else 0
-        pos_y_offset = __road__.laneWidth / 2 - 1
-        lane = int(np.floor(pos_y/__road__.laneWidth) + pos_y_offset)
+        pos_y_offset = __road__.numberOfLanes / 2  
+        lane = int(np.floor(pos_y) + pos_y_offset)
         return lane
 
         
@@ -212,7 +212,7 @@ def run_senario():
             if not car.is_in_road():
                 sim_restart()
                 print('>> Restart')
-                continue
+                break
         
         sim_stop()  
         print('>> Stop')

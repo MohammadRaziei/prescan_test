@@ -163,9 +163,9 @@ else:
             
         def examinLane(self,road = None):
             __road__ = road if road is not None else self.road        
-            pos_y = self.get_position_road()[1] 
-            pos_y_offset = __road__.laneWidth / 2 - 1
-            lane = int(np.floor(pos_y/__road__.laneWidth) + pos_y_offset)
+            pos_y = self.get_position_road()[1] / __road__.laneWidth
+            pos_y_offset = __road__.numberOfLanes / 2 
+            lane = int(np.floor(pos_y/__road__.numberOfLanes) + pos_y_offset)
             return lane
     
             
