@@ -7,11 +7,10 @@ Created on Sat May 18 15:47:01 2019
 import os,numpy as np
 port = 9620
 
-#gcs = 'Experiment_3_cs/Audi_A8_Sedan_1'
 ExperimentName = ''
 bdroot = ''
 prescanFile = ''
-
+eng = None
 def set_experimant(ExpName):
     global ExperimentName,bdroot,prescanFile
     ExperimentName = ExpName
@@ -44,8 +43,10 @@ class sim:
         eng.set_param(bdroot,'SimulationCommand','stop',nargout=0)
         eng.set_param(bdroot,'SimulationCommand','start',nargout=0)
     def Status():
+        '''
+        The software returns 'stopped', 'initializing', 'running', 'paused', 'compiled', 'updating', 'terminating', or 'external' (used with the Simulink Coder™ product).
+        '''
         return eng.get_param(bdroot,'SimulationStatus')
-        #The software returns 'stopped', 'initializing', 'running', 'paused', 'compiled', 'updating', 'terminating', or 'external' (used with the Simulink Coder™ product).
     def Time():
         return eng.get_param(bdroot,'SimulationTime')
    
@@ -74,8 +75,6 @@ def prescan_regenerate():
 
 class Model():
     global ExperimentName,bdroot
-#    __ExperimentName__  = ExperimentName
-#    __bdroot__ = bdroot
     __shared_flags__ = {'create_model':False}
     def __init__(self, name, model):
         self.create_model_ones()
@@ -85,8 +84,6 @@ class Model():
         self.object = eng.eval(ExperimentName+"_models.worldmodel.object{" + str( self.id ) + ", 1} ")
         self.position = self.object['pose']['position']
         self.orientation =  self.object['pose']['orientation']
-#        self.items = {'name':self.name,'id':self.id, 
-#                     'position':self.position,'orientation':self.orientation}
 
     def create_model():
         eng.eval(ExperimentName+"_models = prescan.experiment.readDataModels('"+ ExperimentName +".pb');",nargout=0)
@@ -98,7 +95,10 @@ class Model():
     
     def objectsFindByName(name):
         return int(eng.eval("prescan.worldmodel.objectsFindByName("+ExperimentName+"_models.worldmodel, '"+name+"')") )
-   
+    def Update(**args):
+        python2matlab(**args)
+        sim.Update()
+        
     def __str__(self):
         return self.name
     def __repr__(self):
@@ -111,19 +111,14 @@ class Road(Model):
         self.length = self.object['road']['straightRoad']['roadLength']
         self.numberOfLanes = len(self.object['road']['roadEnds'][0]['laneEnds'])
         self.laneWidth = self.object['road']['roadEnds'][0]['laneEnds'][0]['width']
-#        items = {'length':self.length, 'numberOfLanes':self.numberOfLanes, 'laneWidth':self.laneWidth}
-#        self.items = {**self.items,**items}
+
 class Car(Model):
     def __init__(self, name,road = None):
         Model.__init__(self,name,'Car')
         self.road = road
-#        items = {'road_name':road.name}
-#        self.items = {**self.items,**items}       
+    
     def get_position(self,runtime = True):
         if runtime == True:
-#            if eng.exist('Positions') and ( sim_status() in ['paused','stopped'] ):
-#                x = eng.eval('Positions.Data(1,end)')
-#                y = eng.eval('Positions.Data(2,end)')
             if sim.Status() == 'stopped':
                 x = self.position['x']
                 y = self.position['y']          
@@ -160,7 +155,6 @@ class Car(Model):
     def examinLane(self,road = None):
         __road__ = road if road is not None else self.road        
         pos_y = self.get_position_road()[1] 
-#        pos_y_offset = 1 if pos_y > 0 else 0
         pos_y_offset = __road__.laneWidth / 2 - 1
         lane = int(np.floor(pos_y/__road__.laneWidth) + pos_y_offset)
         return lane
