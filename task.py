@@ -221,10 +221,7 @@ import matlab.engine
 try:
     eng = matlab.engine.connect_matlab('MATLAB_PRESCAN_engine')
 except:
-    try:
-        eng = matlab.engine.connect_matlab()
-    except:
-        pass
+    pass
 
 try:
 
