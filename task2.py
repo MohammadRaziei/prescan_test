@@ -35,29 +35,30 @@ def run_senario():
     lane_start = car.examinLane() 
     print('lane_start : {}'.format(lane_start))
     for i in range(2):
-        RL = 0
+        RL,RL2 = 0,0
         while True:
             sleep(2)
             time = prescan.sim.Time()
             print("time : {}".format(time) )
             x, y = car.get_position_road()
             lane = car.examinLane()
-            RL /= road.laneWidth
             if lane == road.numberOfLanes - 1:
-                RL += np.random.randint(-1,1)
+                RL2 += np.random.randint(-1,1)
             elif lane == 0:
-                RL += np.random.randint(0,2)
+                RL2 += np.random.randint(0,2)
             else :
-                RL += np.random.randint(-1,2) 
-            RL -= lane_start
+                RL2 += np.random.randint(-1,2) 
+            RL = RL2 - lane_start
             print('lane = {} -> RL = {}'.format(lane,RL))
             print('\tx = {}\n\ty = {}'.format(x,y))
             RL = RL * road.laneWidth
             prescan.Model.Update(RL=RL)
             if not car.is_in_road():
+                RL,RL2 = 0,0
+                prescan.sim.Update(RL=RL)
                 prescan.sim.Restart()
                 print('>> Restart')
-                continue
+                break
         
         prescan.sim.Stop()  
         print('>> Stop')   

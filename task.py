@@ -169,7 +169,6 @@ class Car(Model):
         lane = int(np.floor(pos_y) + pos_y_offset)
         return lane
 
-        
 
 
 
@@ -190,26 +189,27 @@ def run_senario():
     lane_start = car.examinLane() 
     print('lane_start : {}'.format(lane_start))
     for i in range(2):
-        RL = 0
+        RL,RL2 = 0,0
         while True:
             sleep(2)
             time = sim_time()
             print("time : {}".format(time) )
             x, y = car.get_position_road()
             lane = car.examinLane()
-            RL /= road.laneWidth
             if lane == road.numberOfLanes - 1:
-                RL += np.random.randint(-1,1)
+                RL2 += np.random.randint(-1,1)
             elif lane == 0:
                 RL += np.random.randint(0,2)
             else :
-                RL += np.random.randint(-1,2) 
-            RL -= lane_start
+                RL2 += np.random.randint(-1,2) 
+            RL = RL2 - lane_start
             print('lane = {} -> RL = {}'.format(lane,RL))
             print('\tx = {}\n\ty = {}'.format(x,y))
             RL = RL * road.laneWidth
             pysim_update(RL=RL)
             if not car.is_in_road():
+                RL,RL2 = 0,0
+                pysim_update(RL=RL)
                 sim_restart()
                 print('>> Restart')
                 break
@@ -231,7 +231,7 @@ try:
 
     print('The End')
 except:
-#    eng.quit()
+    eng.quit()
     pass
-#eng.quit()
+eng.quit()
 
