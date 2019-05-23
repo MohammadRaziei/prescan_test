@@ -55,7 +55,7 @@ def run_senario():
             prescan.Model.Update(RL=RL)
             if not car.is_in_road():
                 RL,RL2 = 0,0
-                prescan.sim.Update(RL=RL)
+                prescan.Model.Update(RL=RL)
                 prescan.sim.Restart()
                 print('>> Restart')
                 break
