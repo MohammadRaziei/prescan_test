@@ -1,0 +1,15 @@
+A1	/block1		output
+B1	/block2		output
+C1	/block3		output
+
+Net	8081	A1,B1
+Net	8082	C1
+
+# comments
+
+A2	/block4		input
+B2	/block5		input
+C2	/block6		input
+
+Net	8083	A2, B2
+Net	8084	C2

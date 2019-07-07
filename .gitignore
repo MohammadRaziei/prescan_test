@@ -1,5 +1,7 @@
 **/Actors
+**/cameraCar_cs_UDP_grt_rtw
 **/cameraeffects
+**/cameras
 **/CameraSensorConfig
 **/Intelligent Traffic Module Plugin
 **/Models
@@ -16,4 +18,5 @@
 **/__pycache__
 
 **.asv
+**.autosave.zip
 
