@@ -1,9 +1,9 @@
-function y = fcn(s) %BY @MohammadRaziei
+function json = fcn(input) %BY @MohammadRaziei
 coder.extrinsic('num2str','bdroot','get_param');
 p = 15;
-s(isnan(s)) = 0;
+input(isnan(input)) = 0;
 u = zeros(9,p);
-m = num2str(s(:), ['%0.' num2str(p) 'f ']);
+m = num2str(input(:), ['%0.' num2str(p) 'f ']);
 sss = 1:p;
 u(1,sss) = m(1,sss);    
 u(2,sss) = m(2,sss);
@@ -20,8 +20,8 @@ ts = (32*ones(1,p));
 ts(sss) = t(1,sss);
 
 len = (89 + 9*p) + (8 + p);
-y = uint8(32*ones(1,len));
-y(1:end) = uint8(['{"Time":' ts ',"Position":{"x":' u(1,:) ',"y":' u(2,:) ',"z":' u(3,:) '},' ...
+json = uint8(32*ones(1,len));
+json(1:end) = uint8(['{"Time":' ts ',"Position":{"x":' u(1,:) ',"y":' u(2,:) ',"z":' u(3,:) '},' ...
         '"Velocity":{"x":' u(4,:) ',"y":' u(5,:) ',"z":' u(6,:) '},' ...
         '"Acceleration":{"x":' u(7,:) ',"y":' u(8,:) ',"z":' u(9,:) '}}']);
-y = uint8(y);
+json = uint8(json);
