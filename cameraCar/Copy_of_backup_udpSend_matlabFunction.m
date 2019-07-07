@@ -1,13 +1,10 @@
 function json = fcn(input) %BY @MohammadRaziei
 coder.extrinsic('num2str','bdroot','get_param');
-% % % % % % % % % % % % % % % % % 
-pInput = 15;
+p = 15;
 pt = 10;
-% % % % % % % % % % % % % % % % % 
-p = pInput + 7;
 input(isnan(input)) = 0;
 u = zeros(9,p);
-m = num2str([input(:);-1], ['% .' num2str(pInput) 'e ']);
+m = num2str(input(:), ['%0.' num2str(p) 'g ']);
 sss = 1:p;
 u(1,sss) = m(1,sss);    
 u(2,sss) = m(2,sss);
@@ -19,7 +16,7 @@ u(7,sss) = m(7,sss);
 u(8,sss) = m(8,sss);
 u(9,sss) = m(9,sss);
 
-t = num2str(round(get_param(bdroot,'SimulationTime'),pt),['%0.' num2str(pt) 'f ']);
+t = num2str(round(get_param(bdroot,'SimulationTime'),pt),['%0.' num2str(pt) 'g ']);
 ts = (32*ones(1,pt));
 ts(1:pt) = t(1,1:pt);
 

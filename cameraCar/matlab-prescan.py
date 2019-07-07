@@ -93,10 +93,10 @@ class Model():
     __shared_flags__ = {'create_model':False,'objects':[]}
     def __init__(self, name, model):
         Model.__shared_flags__['objects'].append(self)
-        self.create_model_ones()
         self.name = name
         self.model = model
     def create(self):
+        self.create_model_ones()
         self.id = Model.objectsFindByName(self.name)
         self.object = eng.eval(ExperimentName+"_models.worldmodel.object{" + str( self.id ) + ", 1} ")
         self.position = self.object['pose']['position']
@@ -127,6 +127,8 @@ class Road(Model):
     def __init__(self, name = 'StraightRoad_1'):
         Road.__shared_flags__['objects'].append(self)
         Model.__init__(self,name,'Road')
+    def create(self):
+        super().create()
         self.length = self.object['road']['straightRoad']['roadLength']
         self.numberOfLanes = len(self.object['road']['roadEnds'][0]['laneEnds'])
         self.laneWidth = self.object['road']['roadEnds'][0]['laneEnds'][0]['width']
@@ -193,6 +195,7 @@ class Reciver_UDP:
         #if x[0] >= 0:
         #print(self.name,": ", x[0])
         return x[0]    
+        
 
 class Reciver_UDP2:
     def __init__(self, port_number=0, this_socket=None):
@@ -207,6 +210,9 @@ class Reciver_UDP2:
         data, addr = self.this_socket.recvfrom(1024)
         data = json.loads(data.decode("utf-8"))
         return  data
+    def get_str(self):
+        data, addr = self.this_socket.recvfrom(1024)
+        return  data.decode("utf-8")
 
 
 class Transmitter_UDP:
@@ -238,7 +244,8 @@ class Q_network:
         #Assume this action is a4 = [3.5, True, False]
         #ran = 1
         ran = random.randint(-2, 3)
-        best_action = [(3.5*ran), True, False]
+        laneWidth = car.road.laneWidth
+        best_action = [(laneWidth*ran), True, False]
         print(best_action)
         return best_action
     
@@ -290,8 +297,8 @@ def get_state():
 '''
 def reset_environment():
     
-    host_pose_reset.send(1)
-    host_speed_reset.send(1)
+    car_pose_reset.send(1)
+    car_speed_reset.send(1)
     other1_pose_reset.send(1)
     other1_speed_reset.send(1)
 ''' 
@@ -302,28 +309,27 @@ set_experimant('cameraCar')
 if __name__ == '__main__':  
     main_Q_Network = Q_network("mainQN") 
     #Creating traffic
-    host = Vehicle('Toyota_Yaris_Hatchback_1',8084, 8085)
-    host.create()
-    
+    road = Road('StraightRoad_1')
+    road.create()
+    car = Vehicle('Toyota_Yaris_Hatchback_1', 8091,road)
+    car.create()
 
 
     Reward = Reciver_UDP(8081)
     Reward.build() 
     
 
-    # test = Reciver_UDP2(8090)
-    # test.build()
 
     #Creating UDP_ports to send the command of actions:    
-    off_set_UDP = Transmitter_UDP( 8072)
+    off_set_UDP = Transmitter_UDP(8072)
     desired_velocity_UDP = Transmitter_UDP(8073)
     throttle_flag_UDP = Transmitter_UDP(8074)
     brake_flag_UDP = Transmitter_UDP(8075)
 
     '''
     #Creating UDP_ports to send the command of reset the environment:
-    host_pose_reset = Transmitter_UDP("host_pose_reset", 8000)
-    host_speed_reset = Transmitter_UDP("host_speed_reset", 8001)
+    car_pose_reset = Transmitter_UDP("car_pose_reset", 8000)
+    car_speed_reset = Transmitter_UDP("car_speed_reset", 8001)
     other1_pose_reset = Transmitter_UDP("other1_pose_reset", 8002)
     other1_speed_reset = Transmitter_UDP("other1_speed_reset", 8003)
     '''
@@ -344,6 +350,7 @@ if __name__ == '__main__':
         #state
         state = get_state() 
         #experience.append(state)
+        
         experience = np.append(experience, state)
 
         #action
@@ -372,36 +379,8 @@ if __name__ == '__main__':
         print("Time:", time)
         timeVector.append(time)
 
-        # print('+++++++++++++++++++++++++++')
-        # print(test.get())
-        # print('===========================')
+        print(repr(car.data.get_str()))
 
-
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         
         
         
