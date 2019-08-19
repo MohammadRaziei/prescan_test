@@ -1,0 +1,39 @@
+{
+  "Time": 0,
+  "Object": 0,
+  "Vehicles": [
+    {
+      "name": "",
+      "data": {
+        "Position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "Velocity": 0
+      },
+      "Sensors": [
+        {
+          "name": "",
+          "data": {
+            "Range": 0,
+            "theta": 0,
+            "ID": 0,
+            "Velocity": 0
+          }
+        }
+      ]
+    }
+  ],
+  "Collision": {
+    "Occurred": 0,
+    "col_1": 0,
+    "cal_2": 0
+  },
+  "done": 0
+}
