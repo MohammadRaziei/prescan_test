@@ -245,6 +245,7 @@ class Road(Model):
         super().close()
 
 ####--------------------------------------------------------------####
+
 class Vehicle(Model):
     __shared_flags__ = {'objects': []}
 
@@ -288,7 +289,7 @@ class Enviroment:
         self.out = Reciver_UDP_json(self.outport)
         self.out.build()
 
-        self.input = None
+        self.inport = None
         off_set_port, desired_velocity_port = inport
         self.off_set_UDP = Transmitter_UDP(off_set_port)  # 8072)
         self.desired_velocity_UDP = Transmitter_UDP(desired_velocity_port)  # 8073)
