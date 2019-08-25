@@ -1,14 +1,14 @@
 <?xml version="1.0" ?>
 <ViewerSettings>
 	<Viewers>
-		<Viewer1 camera="Top View-zoomed"/>
+		<Viewer1 camera="Top View"/>
 		<Viewer2 camera="Top View-zoomed"/>
 		<Viewer3 camera="HumanView_4"/>
-		<Viewer4 camera="HumanView_1"/>
+		<Viewer4 camera="HumanView_2"/>
 	</Viewers>
 	<Layout>
-		<splitter horizontal="True" left="1063" right="0"/>
-		<splitter2 horizontal="True" left="1063" right="0"/>
-		<splitter3 horizontal="False" left="539" right="0"/>
+		<splitter horizontal="True" left="970" right="0"/>
+		<splitter2 horizontal="True" left="485" right="485"/>
+		<splitter3 horizontal="False" left="251" right="250"/>
 	</Layout>
 </ViewerSettings>

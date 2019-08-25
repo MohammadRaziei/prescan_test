@@ -163,7 +163,7 @@ class Transmitter_UDP:
         self.port_number = port_number
         self.this_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.host = host
-        print("Sending data to port: ")
+        print("Sending data to port: {}".format(port_number))
 
     def send(self, ac):
         y = struct.pack("d", ac)
@@ -191,12 +191,13 @@ class Model:
         self.position = self.object['pose']['position']
         self.orientation = self.object['pose']['orientation']
 
-    def __del__(self):
-        self.close()
+    # def __del__(self):
+    #     self.close()
 
     def close(self):
-        Model.__shared_flags__['objects'].remove(self.name)
+        Model.__shared_flags__['objects'].remove(self)
         print('{} closed!'.format(self.name))
+
 
     @staticmethod
     def create_model():
@@ -210,8 +211,7 @@ class Model:
 
     @staticmethod
     def objectsFindByName(name):
-        return int(
-            eng.eval("prescan.worldmodel.objectsFindByName(" + ExperimentName + "_models.worldmodel, '" + name + "')"))
+        return int(eng.eval("prescan.worldmodel.objectsFindByName(" + ExperimentName + "_models.worldmodel, '" + name + "')"))
 
     @staticmethod
     def Update(**args):
@@ -240,9 +240,14 @@ class Road(Model):
         self.numberOfLanes = len(self.object['road']['roadEnds'][0]['laneEnds'])
         self.laneWidth = self.object['road']['roadEnds'][0]['laneEnds'][0]['width']
 
+    # def __del__(self):
+    #     self.close()
+
     def close(self):
-        Vehicle.__shared_flags__['objects'].remove(self.name)
+        Road.__shared_flags__['objects'].remove(self)
         super().close()
+
+
 
 ####--------------------------------------------------------------####
 
@@ -260,11 +265,15 @@ class Vehicle(Model):
         # self.port = data_port if data_port is not None else self.port
         # self.data = Reciver_UDP_json(self.port)
         # self.data.build()
+    #
+    # def __del__(self):
+    #     self.close()
 
     def close(self):
         # self.data.close()
-        Vehicle.__shared_flags__['objects'].remove(self.name)
+        Vehicle.__shared_flags__['objects'].remove(self)
         super().close()
+
 
 ###########################################################
 
@@ -286,7 +295,7 @@ class Discrete:
 class Enviroment:
     def __init__(self,outport=None, inport=None):
         self.outport = outport
-        self.out = Reciver_UDP_json(self.outport)
+        self.out = Reciver_UDP_json(outport)
         self.out.build()
 
         self.inport = None
@@ -294,15 +303,53 @@ class Enviroment:
         self.off_set_UDP = Transmitter_UDP(off_set_port)  # 8072)
         self.desired_velocity_UDP = Transmitter_UDP(desired_velocity_port)  # 8073)
 
+    def __del__(self):
+        self.close()
+
+    def close(self):
+        self.out.close()
+        self.off_set_UDP.close()
+        self.desired_velocity_UDP.close()
+        for model in Model.__shared_flags__['objects']:
+            # print(model)
+            model.close()
+        try:
+            eng.quit()
+        except:
+            pass
+        # print('Enviroment-------close')
+
+    def send(self,data):
+        o,d = data
+        self.off_set_UDP.send(o)
+        self.desired_velocity_UDP.send(d)
+
+    def get(self):
+        self.data = self.out.get()
+        self.object = self.data['Vehicles'][self.data['Object']]
+        return self.data
+
+    def create_model(self, car_name=None, road_name=None):
+        globals()['eng'] = matlab.engine.connect_matlab()
+        self.road = Road(road_name)
+        self.car = Vehicle(car_name, self.road)
+        self.road.create()
+        self.car.create()
+        # print('_____________env______________')
+
+
+
+
+
+
 ####==========================================================#######
 
 class Env:
     delay = 0.05  # s
 
-    def __init__(self, enviroment, car_name=None, road_name=None): #, off_set_port=None, desired_velocity_port=None, throttle_flag_port=None, brake_flag_port=None):
-
-        self.road = Road(road_name)
-        self.car = Vehicle(car_name, self.road)
+    def __init__(self, enviroment): #, off_set_port=None, desired_velocity_port=None, throttle_flag_port=None, brake_flag_port=None):
+        # self.road = Road(road_name)
+        # self.car = Vehicle(car_name, self.road)
         ##self.Reward = Reciver_UDP(reward_port)
 
         # Creating UDP_ports to send the command of actions:
@@ -310,12 +357,12 @@ class Env:
         ##self.desired_velocity_UDP = Transmitter_UDP(desired_velocity_port)  # 8073)
         # self.throttle_flag_UDP = Transmitter_UDP(throttle_flag_port)  # 8074)
         # self.brake_flag_UDP = Transmitter_UDP(brake_flag_port)  # 8075)
-
+        self.enviroment = enviroment
         self.action_space = Discrete(3)
 
-    def create(self):
-        self.road.create()
-        self.car.create()
+    def create(self, car_name=None, road_name=None):
+        self.enviroment.create_model(car_name, road_name)
+
         ##self.Reward.build()
 
     def reset(self):
@@ -324,7 +371,8 @@ class Env:
             observation (object): the initial observation.
         """
         sim.Restart()
-        start_state = [self.car.position["x"], 0]
+        self.render()
+        start_state = [self.object['data']['Position']["x"], 0]
         return start_state
 
     def step(self, action):
@@ -341,12 +389,16 @@ class Env:
         self.close()
 
     def close(self):
-        for model in Model.__shared_flags__['objects']:
-            model.close()
-        eng.quit()
+        self.enviroment.close()
+        # print('Env-------close')
+
 
     def render(self):
-        pass
+        data = self.enviroment.get()
+        self.object = self.enviroment.object
+        self.time = self.enviroment.data['Time']
+        return data
+
 
     def seed(self):
         pass
@@ -387,14 +439,13 @@ class Env:
         else:
             raise ("ERROR!")
 
-        self.off_set_UDP.send(off_set)
-        self.desired_velocity_UDP.send(desired_velocity)
-        self.throttle_flag_UDP.send(throttle_flag)
-        self.brake_flag_UDP.send(brake_flag)
+        # self.off_set_UDP.send(off_set)
+        # self.desired_velocity_UDP.send(desired_velocity)
+        # self.throttle_flag_UDP.send(throttle_flag)
+        # self.brake_flag_UDP.send(brake_flag)
 
 
 def make(experimant_name):
-    globals()['eng'] = matlab.engine.connect_matlab()
     set_experimant(experimant_name)
     '''
     env = Env(car_name='Toyota_Yaris_Hatchback_1', car_port=8091,
@@ -404,8 +455,10 @@ def make(experimant_name):
                       )
     '''
     enviroment = Enviroment(outport=8031,inport=(8072,8073))
-    # enviroment.create()
-    return enviroment
+    enviroment.create_model('Toyota_Yaris_Hatchback_1','StraightRoad_22')
+    env = Env(enviroment)
+
+    return env
 
     # def get_position_road(self,road = None):
     #     __road__ = road if road is not None else self.road
@@ -488,10 +541,16 @@ def reset_environment():
 
 if __name__ == '__main__':
     env = make('PreScan_Vissim_Python_0')
+    env.reset()
     print('done')
     for i in range(10):
-        s = env.out.get()
+        env.render()
+        s = env.object['data']
+        env.enviroment.send((0,5))
+        print('_________\nTime : {}'.format(env.time))
         print(s)
+
+
 
     '''
     env = make('cameraCar')
