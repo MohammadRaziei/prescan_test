@@ -165,8 +165,8 @@ class Transmitter_UDP:
         self.host = host
         print("Sending data to port: {}".format(port_number))
 
-    def send(self, ac):
-        y = struct.pack("d", ac)
+    def send(self, ac,format="d"):
+        y = struct.pack(format, ac)
         self.this_socket.sendto(y, (self.host, self.port_number))
         print("The Action is: ", ac)
 
@@ -299,9 +299,10 @@ class Enviroment:
         self.out.build()
 
         self.inport = None
-        off_set_port, desired_velocity_port = inport
+        off_set_port, desired_velocity_port,reset_port = inport
         self.off_set_UDP = Transmitter_UDP(off_set_port)  # 8072)
         self.desired_velocity_UDP = Transmitter_UDP(desired_velocity_port)  # 8073)
+        self.reset_UDP = Transmitter_UDP(reset_port)  # 8075)
 
     def __del__(self):
         self.close()
@@ -310,6 +311,7 @@ class Enviroment:
         self.out.close()
         self.off_set_UDP.close()
         self.desired_velocity_UDP.close()
+        self.reset_UDP.close()
         for model in Model.__shared_flags__['objects']:
             # print(model)
             model.close()
@@ -319,10 +321,16 @@ class Enviroment:
             pass
         # print('Enviroment-------close')
 
+    def reset(self):
+        self.reset_UDP.send(True,'?')
+        self.reset_UDP.send(False,'?')
+        self.send((0,0))
+
     def send(self,data):
         o,d = data
         self.off_set_UDP.send(o)
         self.desired_velocity_UDP.send(d)
+        # self.reset_UDP.send(r,'?')
 
     def get(self):
         self.data = self.out.get()
@@ -370,7 +378,8 @@ class Env:
         Returns:
             observation (object): the initial observation.
         """
-        sim.Restart()
+        # sim.Restart()
+        self.enviroment.reset()
         self.render()
         start_state = [self.object['data']['Position']["x"], 0]
         return start_state
@@ -454,7 +463,7 @@ def make(experimant_name):
                       off_set_port=8072, desired_velocity_port=8073, throttle_flag_port=8074, brake_flag_port=8075
                       )
     '''
-    enviroment = Enviroment(outport=8031,inport=(8072,8073))
+    enviroment = Enviroment(outport=8031,inport=(8072,8073,8075))
     enviroment.create_model('Toyota_Yaris_Hatchback_1','StraightRoad_22')
     env = Env(enviroment)
 
@@ -543,14 +552,22 @@ if __name__ == '__main__':
     env = make('PreScan_Vissim_Python_0')
     env.reset()
     print('done')
-    for i in range(10):
+    for j in range(2):
+        for i in range(100):
+            env.render()
+            s = env.object['data']
+            env.enviroment.send((0,5))
+            print('_________\nTime : {}'.format(env.time))
+            print(s)
+        env.reset()
+        print('+++++++++++++++++++++++++++++++++++++++++++++++++++++')
+
+    for i in range(10000):
         env.render()
         s = env.object['data']
         env.enviroment.send((0,5))
         print('_________\nTime : {}'.format(env.time))
         print(s)
-
-
 
     '''
     env = make('cameraCar')
