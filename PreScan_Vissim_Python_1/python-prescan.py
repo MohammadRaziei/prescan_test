@@ -159,14 +159,16 @@ class Reciver_UDP_json:
 
 class Transmitter_UDP:
 
-    def __init__(self, port_number=0, host='localhost', this_socket=None):
+    def __init__(self, port_number=0, fmt=None, host='localhost', this_socket=None):
+        self.fmt = fmt if not None else "d"
         self.port_number = port_number
         self.this_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.host = host
         print("Sending data to port: {}".format(port_number))
 
-    def send(self, ac,format="d"):
-        y = struct.pack(format, ac)
+    def send(self, ac,fmt=None):
+        __format__ = fmt if not None else self.fmt
+        y = struct.pack(__format__, ac)
         self.this_socket.sendto(y, (self.host, self.port_number))
         print("The Action is: ", ac)
 
@@ -302,7 +304,7 @@ class Enviroment:
         off_set_port, desired_velocity_port,reset_port = inport
         self.off_set_UDP = Transmitter_UDP(off_set_port)  # 8072)
         self.desired_velocity_UDP = Transmitter_UDP(desired_velocity_port)  # 8073)
-        self.reset_UDP = Transmitter_UDP(reset_port)  # 8075)
+        self.reset_UDP = Transmitter_UDP(reset_port,fmt='?')  # 8075)
 
     def __del__(self):
         self.close()
@@ -322,8 +324,8 @@ class Enviroment:
         # print('Enviroment-------close')
 
     def reset(self):
-        self.reset_UDP.send(True,'?')
-        self.reset_UDP.send(False,'?')
+        self.reset_UDP.send(True)
+        self.reset_UDP.send(False)
         self.send((0,0))
 
     def send(self,data):
@@ -547,8 +549,7 @@ def reset_environment():
     other1_speed_reset.send(1)
 '''
 
-
-if __name__ == '__main__':
+def main():
     env = make('PreScan_Vissim_Python_0')
     env.reset()
     print('done')
@@ -568,6 +569,9 @@ if __name__ == '__main__':
         env.enviroment.send((0,5))
         print('_________\nTime : {}'.format(env.time))
         print(s)
+
+if __name__ == '__main__':
+    main()
 
     '''
     env = make('cameraCar')
