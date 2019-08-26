@@ -160,14 +160,14 @@ class Reciver_UDP_json:
 class Transmitter_UDP:
 
     def __init__(self, port_number=0, fmt=None, host='localhost', this_socket=None):
-        self.fmt = fmt if not None else "d"
+        self.fmt = fmt if fmt is not None else "d"
         self.port_number = port_number
         self.this_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.host = host
         print("Sending data to port: {}".format(port_number))
 
     def send(self, ac,fmt=None):
-        __format__ = fmt if not None else self.fmt
+        __format__ = fmt if fmt is not None else self.fmt
         y = struct.pack(__format__, ac)
         self.this_socket.sendto(y, (self.host, self.port_number))
         print("The Action is: ", ac)
