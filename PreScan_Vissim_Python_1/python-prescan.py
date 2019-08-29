@@ -3,6 +3,42 @@ from datetime import datetime
 
 
 
+def main():
+    env = gym.make('PreScan_Vissim_Python_0')
+    # gym.sim.Restart()
+
+    env.reset()
+    print('done')
+    for j in range(2):
+        for i in range(100):
+            env.render()
+            s = env.object['data']
+            env.enviroment.send((0,15))
+            print('_________\n{}.{} - Time : {}'.format(j+1,i+1,env.time))
+            print(s)
+        env.reset()
+        print('+++++++++++++++++++++++++++++++++++++++++++++++++++++')
+
+    for i in range(10000):
+        env.render()
+        s = env.object['data']
+        env.enviroment.send((0,15))
+        print('_________\n3.{} - Time : {}'.format(i+1,env.time))
+        print(s)
+    env.close()
+
+
+
+
+
+
+
+
+
+
+
+
+'''
 class Q_network:
     # Set learning parameters
     lr = .8
@@ -45,7 +81,7 @@ class Q_network:
         self.Q[self.state, self.action] = self.Q[self.state, self.action] + Q_network.lr * (
                     self.reward + Q_network.y * np.max(self.Q[next_state, :]) - self.Q[self.state, self.action])
 
-
+'''
 '''
 def reset_environment():
 
@@ -55,28 +91,7 @@ def reset_environment():
     other1_speed_reset.send(1)
 '''
 
-def main():
-    env = gym.make('PreScan_Vissim_Python_0')
-    gym.sim.Stop()
-    env.reset()
-    print('done')
-    for j in range(2):
-        for i in range(100):
-            env.render()
-            s = env.object['data']
-            env.enviroment.send((0,5))
-            print('_________\n{}.{} - Time : {}'.format(j+1,i+1,env.time))
-            print(s)
-        env.reset()
-        print('+++++++++++++++++++++++++++++++++++++++++++++++++++++')
 
-    for i in range(100):
-        env.render()
-        s = env.object['data']
-        env.enviroment.send((0,5))
-        print('_________\n3.{} - Time : {}'.format(i+1,env.time))
-        print(s)
-    env.close()
 if __name__ == '__main__':
     main()
 

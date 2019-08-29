@@ -67,9 +67,9 @@ class sim:
         return eng.get_param(bdroot, 'SimulationTime')
 
     @staticmethod
-    def Close():
+    def Close_window():
         # eng.close_system(bdroot)
-        os.system('TASKKILL /F /IM VisViewerApp.exe')
+        os.system('TASKKILL /F /IM VisViewerApp.exe 2> NUL')
 
 
 def python2matlab(**args):

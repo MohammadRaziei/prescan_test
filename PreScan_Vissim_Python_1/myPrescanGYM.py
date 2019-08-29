@@ -53,8 +53,12 @@ class Env:
         self.close()
 
     def close(self):
+        try:
+            sim.Stop()
+        except:
+            pass
         self.enviroment.close()
-        # sim.Close()
+        sim.Close_window()
 
         # print('Env-------close')
 
@@ -123,7 +127,7 @@ def make(experimant_name):
     enviroment = Enviroment(outport=8031,inport=(8072,8073,8075))
     enviroment.create_model('Toyota_Yaris_Hatchback_1','StraightRoad_22')
     env = Env(enviroment)
-    sim.Start()
+    sim.Restart()
 
     return env
 
