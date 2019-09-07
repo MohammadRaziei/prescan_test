@@ -1,30 +1,42 @@
-import myPrescanGYM as gym
+import mygymPrescan as gym
 from datetime import datetime
 
 
 
 def main():
     env = gym.make('PreScan_Vissim_Python_0')
+    # env.__close__window__ = True
     # gym.sim.Restart()
+    env.delay = 0
 
-    env.reset()
+    start_state = env.reset()
+    state = start_state
     print('done')
     for j in range(2):
-        for i in range(100):
+        for i in gym.time_range(100):
             env.render()
-            s = env.object['data']
-            env.enviroment.send((0,15))
+            # s = env.agent['data']
+            # env.enviroment.send((0,15))
+            action = [0,15]
+            s, r, done, _ = env.step(action)
+
             print('_________\n{}.{} - Time : {}'.format(j+1,i+1,env.time))
-            print(s)
-        env.reset()
+            print('  state = {}\n  reward = {}\n  done = {}'.format(s,r,done))
+            if done:
+                break
+            # print(s)    
+        state = env.reset()
         print('+++++++++++++++++++++++++++++++++++++++++++++++++++++')
 
-    for i in range(10000):
+    for i in gym.time_range(1):
         env.render()
-        s = env.object['data']
+        s = env.agent['data']
         env.enviroment.send((0,15))
         print('_________\n3.{} - Time : {}'.format(i+1,env.time))
         print(s)
+
+    # gym.sim.Stop()
+    print(gym.Model.objects)
     env.close()
 
 
