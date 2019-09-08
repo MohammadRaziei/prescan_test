@@ -26,7 +26,7 @@ class Enviroment:
         self.out.build()
 
         self.inport = inport
-        self.inp = Transmitter_UDP(8070,fmt='ddd')
+        self.inp = Transmitter_UDP(inport,fmt='ddd')
 
         # off_set_port, desired_velocity_port,reset_port = inport
         # self.off_set_UDP = Transmitter_UDP(off_set_port)  # 8072)
@@ -71,6 +71,8 @@ class Enviroment:
     def get(self):
         self.data = self.out.get()
         self.agent = self.data['Vehicles'][self.data['Object']]
+        self.collision = self.data['Collision']
+        # self.collision['Occurred'] = bool(self.collision['Occurred'])
         return self.data
 
     def create_model(self, car_name=None, road_name=None):

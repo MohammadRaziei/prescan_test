@@ -13,18 +13,13 @@ from time import sleep
 class PrescanEnv:
     delay = 0.05  # s
 
-    def __init__(self, enviroment): #, off_set_port=None, desired_velocity_port=None, throttle_flag_port=None, brake_flag_port=None):
-        # self.road = Road(road_name)
-        # self.car = Vehicle(car_name, self.road)
-        ##self.Reward = Reciver_UDP(reward_port)
-
-        # Creating UDP_ports to send the command of actions:
-        ##self.off_set_UDP = Transmitter_UDP(off_set_port)  # 8072)
-        ##self.desired_velocity_UDP = Transmitter_UDP(desired_velocity_port)  # 8073)
-        # self.throttle_flag_UDP = Transmitter_UDP(throttle_flag_port)  # 8074)
-        # self.brake_flag_UDP = Transmitter_UDP(brake_flag_port)  # 8075)
+    def __init__(self, enviroment):
         self.enviroment = enviroment
-        self.action_space = Discrete(3)
+        self.action_space = Discrete(5)
+        self.__action__ = np.zeros((1,self.action_space.n))
+        self.observation_space = Discrete(13)
+
+
         self.__close__window__ = False
         self.reward_function = None
         self.__render__ = 0
@@ -45,20 +40,19 @@ class PrescanEnv:
         self.enviroment.reset()
         while True:
             self.render()
-            # if self.agent['data']['Position']['x'] < 5:
             if not self.done:
                 break
         start_state = [self.agent['data']['Position']["x"], 0]
         return start_state
 
     def step(self, action):
+        self.send(action)
         if PrescanEnv.delay > 0 :
             sleep(PrescanEnv.delay)
-        self.send(action)
         self.render()
 
         car = self.agent
-        observation = [car['data']["Position"]["x"], car['data']["Position"]["y"]]
+        observation = car['Sensors'][0]['data']['Range'] + [car['data']["Velocity"],car['data']["Position"]["x"], car['data']["Position"]["y"]]
         reward = self.calc_reward()
         done = self.done
         info = {}
@@ -70,26 +64,45 @@ class PrescanEnv:
         self.__render__ += 1
         data = self.enviroment.get()
         self.agent = self.enviroment.agent
-        self.collision = data['Collision']
+        self.collision = self.enviroment.collision
         self.time = self.enviroment.data['Time']
         self.done = bool(self.enviroment.data['done'])
             
         return data
 
     def calc_reward(self):
-        reward_T = self.agent['data']['Velocity']
-
-
-
-
-
+        Vel = self.agent['data']['Velocity']
+        Longitudinal_reward = reward_velocity(Vel,20)
+        Lateral_reward = -0.5  if self.__action__[0] == 1 or self.__action__[2] == 1 else 0
+        Collision_reward = -10 if self.collision['Occured'] else 0
+        
+        reward_T = Longitudinal_reward + Lateral_reward + Collision_reward
         return reward_T
 
     def seed(self):
         pass
 
     def send(self,action):
-        self.enviroment.send(action)
+        # action : [-3.5 0 3.5 V 0]
+        # action : [0/1  0/1 0/1 V 0/1]
+        if len(action) != self.action_space.n:
+            raise EnvironmentError
+        if action[0] == 1:
+            offset = -1
+        if action[2] == 1:
+            offset = 1
+        if action[1] == 1:
+            offset = 0
+        laneWidth = self.enviroment.road.laneWidth
+        offset *= laneWidth
+        if action[4] == 1:
+            __action__ = self.__action__
+
+        else:
+            __action__ =[offset, action[3]]
+        
+        self.__action__ = __action__
+        self.enviroment.send(__action__)
 
 
     def __del__(self):
@@ -106,19 +119,6 @@ class PrescanEnv:
             sim.Close_window()
 
   
-    @staticmethod
-    def __get_state__():
-        state = []
-        for i in Vehicle.objects:
-            data = i.data.get()
-            x = data["Position"]["x"]
-            v = data["Velocity"]["x"]
-            state.append(x)
-            state.append(v)
-            print("Time: ", data["Time"])
-            print(i.name, "position: ", x)
-            print(i.name, "speed: ", v, end="\n\n")
-        return state
   
 '''
     def action_vec_to_commands(self, action, state):
@@ -152,8 +152,7 @@ class PrescanEnv:
 
 def make(experimant_name):
     set_experimant(experimant_name)
-    enviroment = Enviroment(outport=8031,inport=(8072,8073,8075))
-    # enviroment = Enviroment(outport=8031,inport=8070)
+    enviroment = Enviroment(outport=8031,inport=8070)
     enviroment.create_model('Toyota_Yaris_Hatchback_1','StraightRoad_22')
     env = PrescanEnv(enviroment)
     sim.Restart()
@@ -162,10 +161,20 @@ def make(experimant_name):
 
 
 
-
-
-
-
+def reward_velocity(x,a,normal=True):
+    '''
+    a     : avalable
+    0.75a : max at x
+    0.25a : max at R
+    '''
+    if x > a or x < 0:
+        return -0.01
+    R = -a + x + np.sqrt(a**2-a*x)
+    if normal:
+        return 4 * R / a
+    return R
+        
+    
 
 __all__ = ['PrescanEnv','sim','Model']
 

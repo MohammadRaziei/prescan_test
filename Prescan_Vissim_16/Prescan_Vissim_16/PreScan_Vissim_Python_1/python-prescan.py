@@ -14,11 +14,12 @@ def main():
     print('done')
     for j in range(2):
         for i in gym.time_range(100):
-            env.render()
+            # env.render()
+            print(env.enviroment.out.get_str())
+            
             p = env.collision
-            if p['Occurred'] == 1:
-                print('0019773722')
-            # env.enviroment.send((0,15))
+            if True:#p['Occurred']:
+                print(p)
             action = [0,15]
             s, r, done, _ = env.step(action)
 
@@ -26,19 +27,18 @@ def main():
             print('  state = {}\n  reward = {}\n  done = {}'.format(s,r,done))
             if done:
                 break
+            
         state = env.reset()
         print('+++++++++++++++++++++++++++++++++++++++++++++++++++++')
 
-    for i in gym.time_range(1):
-        env.render()
-        s = env.collision
-        env.enviroment.send((0,15))
-        print('_________\n3.{} - Time : {}'.format(i+1,env.time))
-        print(s)
+    # for i in gym.time_range(1):
+    #     env.render()
+    #     env.enviroment.send((0,15))
+    #     print('_________\n3.{} - Time : {}'.format(i+1,env.time))
 
-    # gym.sim.Stop()
-    print(gym.Model.objects)
-    env.close()
+    # # gym.sim.Stop()
+    # print(gym.Model.objects)
+    # env.close()
 
 
 
