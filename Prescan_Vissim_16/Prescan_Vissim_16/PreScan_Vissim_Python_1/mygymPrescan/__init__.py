@@ -7,6 +7,7 @@ Created on Sat May 18 15:47:01 2019
 
 from mygymPrescan.PrescanEnviroment import *
 from time import sleep
+import numpy as np
 
 
 
@@ -38,11 +39,8 @@ class PrescanEnv:
         """
         # sim.Restart()
         self.enviroment.reset()
-        while True:
-            self.render()
-            if not self.done:
-                break
-        start_state = [self.agent['data']['Position']["x"], 0]
+
+        start_state = np.zeros((1,self.observation_space.n))
         return start_state
 
     def step(self, action):
@@ -66,15 +64,16 @@ class PrescanEnv:
         self.agent = self.enviroment.agent
         self.collision = self.enviroment.collision
         self.time = self.enviroment.data['Time']
-        self.done = bool(self.enviroment.data['done'])
-            
+        # self.done = bool(self.enviroment.data['done'])
+        self.done = self.enviroment.done
         return data
 
     def calc_reward(self):
         Vel = self.agent['data']['Velocity']
         Longitudinal_reward = reward_velocity(Vel,20)
-        Lateral_reward = -0.5  if self.__action__[0] == 1 or self.__action__[2] == 1 else 0
-        Collision_reward = -10 if self.collision['Occured'] else 0
+        Lateral_reward = -0.5  if self.__action__[0] != 0 else 0
+        print(self.collision)
+        Collision_reward = -10 if self.collision['Occurred'] else 0
         
         reward_T = Longitudinal_reward + Lateral_reward + Collision_reward
         return reward_T

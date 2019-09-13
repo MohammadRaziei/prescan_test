@@ -16,9 +16,12 @@ class Discrete:
     def __repr__(self):
         return "Discrete(%d)" % self.n
 
-def time_range(t_end,steps=0.05):
+time_step = 0.005
+def time_range(t_end,steps=time_step):
     return range(int(t_end/steps))
-
+def time_at(t,steps=time_step):
+    return int(t/steps)
+    
 class Enviroment:
     def __init__(self,outport=None, inport=None):
         self.outport = outport
@@ -55,7 +58,13 @@ class Enviroment:
         # self.reset_UDP.send(False)
         # self.send((0,0))
         self.send_vec([0,0,1])
+
+        while True:
+            self.get()
+            if not self.done:
+                break
         self.send_vec([0,0,0])
+        return 
 
     def send_vec(self,data):
         o = data[0];v = data[1];r = data[2]
@@ -73,6 +82,7 @@ class Enviroment:
         self.agent = self.data['Vehicles'][self.data['Object']]
         self.collision = self.data['Collision']
         # self.collision['Occurred'] = bool(self.collision['Occurred'])
+        self.done = bool(self.data['done'])
         return self.data
 
     def create_model(self, car_name=None, road_name=None):

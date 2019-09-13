@@ -13,14 +13,12 @@ def main():
     state = start_state
     print('done')
     for j in range(2):
-        for i in gym.time_range(100):
+        # env.reset()
+        for i in gym.time_range(10):
             # env.render()
-            print(env.enviroment.out.get_str())
-            
-            p = env.collision
-            if True:#p['Occurred']:
-                print(p)
-            action = [0,15]
+            # env.enviroment.send([0,15])
+            # print(env.enviroment.out.get_str())
+            action = [0, 1, 0, 15, 0]
             s, r, done, _ = env.step(action)
 
             print('_________\n{}.{} - Time : {}'.format(j+1,i+1,env.time))
@@ -39,7 +37,6 @@ def main():
     # # gym.sim.Stop()
     # print(gym.Model.objects)
     # env.close()
-
 
 
 
