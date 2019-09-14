@@ -17,7 +17,7 @@ class PrescanEnv:
     def __init__(self, enviroment):
         self.enviroment = enviroment
         self.action_space = Discrete(5)
-        self.__action__ = np.zeros((1,self.action_space.n))
+        self.__action__ = np.squeeze(np.zeros((1,self.action_space.n))).tolist()
         self.observation_space = Discrete(13)
 
 
@@ -40,7 +40,7 @@ class PrescanEnv:
         # sim.Restart()
         self.enviroment.reset()
 
-        start_state = np.zeros((1,self.observation_space.n))
+        start_state = np.squeeze(np.zeros((1,self.observation_space.n))).tolist()
         return start_state
 
     def step(self, action):
