@@ -1,26 +1,16 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat May 18 15:47:01 2019
+
+@author: MohammadRaziei
+"""
 from mygymPrescan.PrescanModel import *
 
 
 
 
-class Discrete:
-    r"""A discrete space in :math:`\{ 0, 1, \\dots, n-1 \}`.
-    Example::
-        >>> Discrete(2)
-    """
 
-    def __init__(self, n):
-        assert n >= 0
-        self.n = n
 
-    def __repr__(self):
-        return "Discrete(%d)" % self.n
-
-time_step = 0.005
-def time_range(t_end,steps=time_step):
-    return range(int(t_end/steps))
-def time_at(t,steps=time_step):
-    return int(t/steps)
     
 class Enviroment:
     def __init__(self,outport=None, inport=None):
@@ -81,7 +71,7 @@ class Enviroment:
         self.data = self.out.get()
         self.agent = self.data['Vehicles'][self.data['Object']]
         self.collision = self.data['Collision']
-        # self.collision['Occurred'] = bool(self.collision['Occurred'])
+        self.collision['Occurred'] = bool(self.collision['Occurred'])
         self.done = bool(self.data['done'])
         return self.data
 
